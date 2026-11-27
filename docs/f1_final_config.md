@@ -41,3 +41,19 @@ The design history is summarised in Table S4 of the article. This file records t
 - Earlier survey: links within 100 m only (1,076); old status used as calibrated P(safe now | old status).
 - Further outcomes: misled households, false alarms, capacity, distance-decay switching; field realism with a daily
   return to a base well and 15% of owners absent.
+
+## Additional analyses (2026-11-27, no new simulation runs)
+- src/f1/inference.py on the v6 results: sign-flip permutation (exact for 10 census blocks) and Wilcoxon tests of the
+  primary family, Holm-adjusted; the five confirmatory census blocks reported as rows of Table 2; leave-one-block-out
+  range; 17 upazila super-blocks of 4 km; Monte Carlo SE of block means against the SD between blocks; Figure S1.
+- Costing clarified: time-based (US$28.80 per team-day = 12 tests x US$2.40 all-in), time plus kit (US$0.17 per test)
+  and per test (US$2.40 x tests performed); tests per day from the runs (Table S6).
+
+## Sensitivity analyses (2026-11-28)
+- experiment4.py --zero_as 5: kit readings of 0 set to 5 ug/L before log10 (fitting data and campaign observations),
+  census and upazila survey (v6_zero5, v6_bd2012_zero5). --kit_nugget: kit-error variance of the 944 pairs (0.113)
+  added to the GP nugget in the census (v6_kitnug). Defaults reproduce v6_main exactly. Table S7 (inference.py).
+
+## Reproducibility audit (2026-11-28)
+- src/f1/audit.py recomputes Table 2, Holm, permutation/Wilcoxon (Table S5), costs (Table S6), Table S7 and the
+  kit-error variance independently from the campaign results; 116/116 checks match (results/f1_v6_audit.csv).

@@ -11,12 +11,12 @@ Key changes against experiment3:
 
     python -X utf8 src/f1/experiment4.py --tag dev6_lam --dev --lams static=0 static=0.1 ...   (see README)
 """
-import argparse, itertools, json, pathlib, sys, time, zlib
+import argparse, itertools, json, os, pathlib, sys, time, zlib
 import numpy as np, pandas as pd
 from joblib import Parallel, delayed
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from data import load_wells, load_kit, ROOT
-from sim2 import Campaign, KitModel, Field
+from sim2 import Campaign, KitModel, Field, GPLearner
 from sim4 import run4
 from experiment import build_models
 from experiment3 import tertiles
@@ -99,6 +99,14 @@ def one(area, split, blk_name, blk, prior, models, policy, learner, seed, radius
     return rows
 
 
+def add_kit_var(prior, models, kit_var):
+    """Sensitivity analysis: GP nugget plus the kit-error variance (the GP is fitted to laboratory values in the census)."""
+    if kit_var > 0 and "gp" in models:
+        g = models["gp"]
+        models = dict(models, gp=GPLearner(g.sill, g.range_m, g.nugget + kit_var))
+    return prior, models
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--tag", required=True)
@@ -125,6 +133,8 @@ def main():
     ap.add_argument("--absent", type=float, default=0.0)
     ap.add_argument("--jobs", type=int, default=14)
     ap.add_argument("--thin", type=float, nargs="+", default=[1.0])
+    ap.add_argument("--zero_as", type=float, default=1.0, help="value (ug/L) given to kit readings of 0 before log10")
+    ap.add_argument("--kit_nugget", action="store_true", help="add the kit-error variance (944 pairs) to the GP nugget")
     a = ap.parse_args()
 
     lams = {}
@@ -137,6 +147,14 @@ def main():
         from data_ext import load_bd2012
         d0 = load_bd2012()
     kit_df = load_kit()
+    os.environ["F1_ZERO_AS"] = str(a.zero_as)          # read by sim2.Campaign in every worker
+    if a.area != "araihazar":                          # fitting data are kit readings: same transform
+        d0["log_as"] = np.log10(np.clip(np.where(d0["as_ppb"] == 0, a.zero_as, d0["as_ppb"]), 1, None))
+    kit_var = 0.0
+    if a.kit_nugget:
+        kl = np.log10(np.clip(np.where(kit_df["kit"] == 0, a.zero_as, kit_df["kit"]), 1, None))
+        kit_var = float(np.var(kl - np.log10(kit_df["lab"].clip(lower=1)), ddof=1))
+        print("kit-error variance added to the nugget:", round(kit_var, 4), flush=True)
     kitm = KitModel(kit_df) if (a.kit == "on" and not a.impute) else None
     fieldp = Field(test_min=a.test_min)
     jobs = []
@@ -148,12 +166,12 @@ def main():
             dev = halves["dev"]
             for b in dev:
                 fit = [g for k, g in dev.items() if k != b]
-                prior, models = build_models(fit, thr, 0, a.learners)
+                prior, models = add_kit_var(*build_models(fit, thr, 0, a.learners), kit_var)
                 targets.append((b, dev[b], prior, models, known_probs(pd.concat(fit), thr) if a.known < 0 else None))
         else:
             for fit, ev in (("dev", "test"), ("test", "dev")):
                 fitb = list(halves[fit].values())
-                prior, models = build_models(fitb, thr, 0, a.learners)
+                prior, models = add_kit_var(*build_models(fitb, thr, 0, a.learners), kit_var)
                 kp = known_probs(pd.concat(fitb), thr) if a.known < 0 else None
                 targets += [(b, g, prior, models, kp) for b, g in halves[ev].items()]
         if a.min_known:

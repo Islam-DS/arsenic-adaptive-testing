@@ -15,3 +15,8 @@ $E --tag v6_thin     --splits 2 --seeds 4 --thr 50 --kit on --thin 0.5 0.25 --po
 $E --tag v6_t10      --splits 2 --seeds 4 --thr 50 --kit on --test_min 10 --policies sweep static adaptive learning > results/v6_t10.log 2>&1
 $E --tag v6_bd2012_old --area bd2012 --impute --splits 2 --seeds 3 --thr 50 10 --known -1 --min_known 20 --policies sweep static adaptive learning > results/v6_bd2012_old.log 2>&1
 echo ALL_DONE
+# sensitivity analyses added after review (2026-11-28): kit readings of 0 set to 5 ug/L; kit-error variance added to the GP nugget
+$E --tag v6_zero5      --splits 5 --seeds 4 --thr 50 10 --kit on --zero_as 5 --policies sweep static adaptive learning > results/v6_zero5.log 2>&1
+$E --tag v6_bd2012_zero5 --area bd2012 --impute --splits 2 --seeds 3 --thr 50 10 --zero_as 5 --policies sweep static adaptive learning > results/v6_bd2012_zero5.log 2>&1
+$E --tag v6_kitnug     --splits 5 --seeds 4 --thr 50 10 --kit on --kit_nugget --policies sweep static adaptive learning > results/v6_kitnug.log 2>&1
+echo SENS_DONE

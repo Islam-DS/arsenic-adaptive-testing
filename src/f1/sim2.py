@@ -14,6 +14,7 @@ Policies form an ablation ladder; all use the same score  p_j * (unsecured house
   learning  as adaptive, and also updates P(safe) of untested wells with a learner fed by the results
   random    (count mode only) test wells in random order
 """
+import os
 from dataclasses import dataclass, field
 import numpy as np
 from scipy import sparse
@@ -72,7 +73,8 @@ class Campaign:
         else:
             reading = kit.sample(lab, rng)
         self.kit_safe = reading <= thr * advise_frac   # team advises switching only below this reading
-        self.kit_log = np.log10(np.clip(reading, 1, None))
+        zero_as = float(os.environ.get("F1_ZERO_AS", "1"))   # value given to kit readings of 0 (sensitivity analysis)
+        self.kit_log = np.log10(np.clip(np.where(reading == 0, zero_as, reading), 1, None))
         # what learners may use: kit results of tested wells (filled in by run) and old results of known wells
         self.obs_safe = self.kit_safe.copy()
         self.obs_log = self.kit_log.copy()

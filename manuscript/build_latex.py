@@ -16,7 +16,7 @@ AFFIL = "Al-Farabi Kazakh National University, Almaty, Kazakhstan"
 EMAIL = "islam_md_mahbubul@live.kaznu.kz"
 
 UNI = {"µ": r"\textmu{}", "×": r"$\times$", "−": r"$-$", "≤": r"$\leq$", "≥": r"$\geq$", "²": r"\textsuperscript{2}",
-       "₁₀": r"$_{10}$", "λ": r"$\lambda$", "½": r"1/2", "’": "'", "‘": "`", "“": "``", "”": "''", "…": r"\ldots{}"}
+       "₁₀": r"$_{10}$", "λ": r"$\lambda$", "½": r"1/2", "’": "'", "‘": "`", "“": "``", "”": "''", "…": r"\ldots{}", "∗": r"$\ast$", "é": r"\'{e}"}
 
 
 def esc_text(s):
@@ -75,25 +75,31 @@ def ref_tex(e):
     return s
 
 
-def body_to_tex(md):
+def body_to_tex(md, label_prefix=""):
     lines, out, i = md.split("\n"), [], 0
     fig_n = tab_n = 0
+    spec_hint = None
     while i < len(lines):
         ln = lines[i]
+        if ln.startswith("<!-- spec:"):
+            spec_hint = ln[len("<!-- spec:"):].rstrip("->").strip()
+            i += 1
+            continue
         if ln.startswith("# "):
-            title = re.sub(r"^#\s+\d+\.\s*", "", ln).strip()
+            title = re.sub(r"^#\s+(\d+\.|Appendix [A-Z]\.)\s*", "", ln).strip()
             out.append(f"\\section{{{inline(title)}}}")
         elif ln.startswith("## "):
-            title = re.sub(r"^##\s+\d+\.\d+\.\s*", "", ln).strip()
+            title = re.sub(r"^##\s+(\d+\.\d+\.\s*)?", "", ln).strip()
             out.append(f"\\subsection{{{inline(title)}}}")
         elif ln.startswith("!["):
             m = re.match(r"!\[(.*)\]\((.*)\)", ln)
             fig_n += 1
-            out.append("\\begin{figure}[H]\n\\centering\n"
+            cap = re.sub(r"^\*\*Figure [A-Z]?\d+\.\*\*\s*", "", m.group(1))
+            out.append("\\begin{figure}[!htbp]\n\\centering\n"
                        f"\\includegraphics[width=\\textwidth]{{{m.group(2)}}}\n"
-                       f"\\caption{{{inline(m.group(1))}}}\n\\label{{fig{fig_n}}}\n\\end{{figure}}")
+                       f"\\caption{{{inline(cap)}}}\n\\label{{{label_prefix}fig{fig_n}}}\n\\end{{figure}}")
         elif ln.startswith("**Table"):
-            cap = re.sub(r"^\*\*Table \d+\.\*\*\s*", "", ln)
+            cap = re.sub(r"^\*\*Table [A-Z]?\d+\.\*\*\s*", "", ln)
             j = i + 1
             while j < len(lines) and not lines[j].startswith("|"):
                 j += 1
@@ -104,13 +110,41 @@ def body_to_tex(md):
                 j += 1
             tab_n += 1
             ncol = len(rows[0])
-            spec = "p{2.4cm}p{2.6cm}" + "c" * (ncol - 2)
-            body = ["\\toprule", " & ".join(f"\\textbf{{{inline(c)}}}" for c in rows[0]) + " \\\\", "\\midrule"]
-            body += [" & ".join(inline(c) for c in r) + " \\\\" for r in rows[1:]]
-            body += ["\\bottomrule"]
-            out.append("\\begin{table}[H]\n" f"\\caption{{{inline(cap)}}}\n\\label{{tab{tab_n}}}\n"
-                       "\\footnotesize\n\\begin{adjustwidth}{-\\extralength}{0cm}\\centering\n"
-                       f"\\begin{{tabular}}{{{spec}}}\n" + "\n".join(body) + "\n\\end{tabular}\n\\end{adjustwidth}\n\\end{table}")
+            if spec_hint:
+                spec, size = spec_hint, "\\scriptsize\\setlength{\\tabcolsep}{3pt}"
+            else:
+                spec, size = ("p{3.4cm}p{5.2cm}p{5.2cm}" if ncol == 3 else "p{2.5cm}p{2.6cm}" + "c" * (ncol - 2)), "\\footnotesize"
+            spec_hint = None
+            head = " & ".join(f"\\textbf{{{inline(c)}}}" for c in rows[0]) + " \\\\"
+            data = [" & ".join(inline(c) for c in r) + " \\\\" for r in rows[1:]]
+            label = f"{label_prefix}tab{tab_n}"
+            if len(data) > 40:                       # long table: breaks across pages, full width incl. left margin
+                out.append("{" + size + "\\setlength{\\tabcolsep}{3pt}\\setlength{\\LTleft}{-\\extralength}"
+                           "\\setlength{\\LTright}{0pt plus 1fill}\\setlength{\\LTcapwidth}{\\textwidth}\n"
+                           f"\\begin{{longtable}}{{{spec}}}\n\\caption{{{inline(cap)}}}\\label{{{label}}}\\\\\n"
+                           f"\\toprule\n{head}\n\\midrule\n\\endfirsthead\n"
+                           f"\\multicolumn{{{ncol}}}{{l}}{{\\textit{{Table \\thetable{{}} (continued)}}}}\\\\\n\\toprule\n{head}\n\\midrule\n\\endhead\n"
+                           "\\bottomrule\n\\endlastfoot\n" + "\n".join(data) + "\n\\end{longtable}}")
+            else:
+                place = "H" if label_prefix else "!htbp"     # appendix tables stay in order, before the references
+                out.append(f"\\begin{{table}}[{place}]\n" f"\\caption{{{inline(cap)}}}\n\\label{{{label}}}\n"
+                           f"{size}\n\\begin{{adjustwidth}}{{-\\extralength}}{{0cm}}\\centering\n"
+                           f"\\begin{{tabular}}{{{spec}}}\n\\toprule\n{head}\n\\midrule\n" + "\n".join(data) +
+                           "\n\\bottomrule\n\\end{tabular}\n\\end{adjustwidth}\n\\end{table}")
+            i = j
+            continue
+        elif ln.startswith("**Algorithm"):
+            cap = inline(ln)
+            j = i + 1
+            while j < len(lines) and not re.match(r"^\d+\. ", lines[j]):
+                j += 1
+            items = []
+            while j < len(lines) and re.match(r"^\d+\. ", lines[j]):
+                items.append(r"\item " + inline(re.sub(r"^\d+\.\s*", "", lines[j])))
+                j += 1
+            out.append("\\begin{figure}[H]\n\\noindent\\fbox{\\begin{minipage}{0.96\\linewidth}\\small\n" + cap +
+                       "\n\\begin{enumerate}[leftmargin=*,labelsep=2mm,itemsep=0pt]\n" + "\n".join(items) +
+                       "\n\\end{enumerate}\n\\end{minipage}}\n\\end{figure}")
             i = j
             continue
         elif ln.startswith("$$"):
@@ -141,9 +175,10 @@ def main():
     fm = re.match(r"---\n(.*?)\n---\n", src, re.S)
     meta = dict(re.findall(r'(\w+): "?(.*?)"?$', fm.group(1), re.M))
     md = src[fm.end():]
+    appendix_md = (M / "appendix.md").read_text(encoding="utf-8") if (M / "appendix.md").exists() else ""
     bib = parse_bib((M / "references.bib").read_text(encoding="utf-8"))
     order = []
-    for m in re.finditer(r"\[@([^\]]+)\]", md):
+    for m in re.finditer(r"\[@([^\]]+)\]", md + appendix_md):
         for k in m.group(1).split(";"):
             k = k.strip().lstrip("@")
             if k not in order:
@@ -154,8 +189,9 @@ def main():
     abstract = section_text(md, "Abstract")
     kw = re.search(r"\*\*Keywords:\*\*\s*(.*)", abstract).group(1)
     abstract = abstract.split("**Keywords:**")[0].strip()
-    b0 = md.index("# 1. Introduction"); b1 = md.index("# Supplementary Materials")
+    b0 = md.index("# 1. Introduction"); b1 = md.index("# Author Contributions")
     body = body_to_tex(md[b0:b1].strip())
+    appendix = body_to_tex(appendix_md.strip(), label_prefix="app") if appendix_md else ""
     back = {k: inline(section_text(md, v)) for k, v in (
         ("supp", "Supplementary Materials"), ("contrib", "Author Contributions"), ("funding", "Funding"),
         ("irb", "Institutional Review Board Statement"), ("consent", "Informed Consent Statement"),
@@ -165,7 +201,12 @@ def main():
     refs = "\n".join(f"\\bibitem{{{k}}}\n{ref_tex(bib[k])}\n" for k in order)
     title = meta["title"]
 
+    supp_tex = ("\\supplementary{" + back["supp"] + "}\n\n") if back["supp"] else ""
+    app_tex = ("\\appendixtitles{yes}\n\\appendixstart\n\\appendix\n" + appendix + "\n") if appendix else ""
     tex = rf"""\documentclass[sustainability,article,submit,pdftex,moreauthors]{{Definitions/mdpi}}
+\usepackage{{longtable}}
+\newcolumntype{{L}}[1]{{>{{\raggedright\arraybackslash}}p{{#1}}}}
+\newcolumntype{{R}}[1]{{>{{\raggedleft\arraybackslash}}p{{#1}}}}
 \makeatletter\hyperrefpackage
 \patchcmd{{\NAT@citexnum}}{{--\NAT@penalty}}{{-\NAT@penalty}}{{}}{{}}
 \makeatother
@@ -207,9 +248,7 @@ $^{{2}}$ \quad Riga Technical University, Riga, Latvia; \href{{mailto:Nadezda.Ku
 
 \vspace{{6pt}}
 
-\supplementary{{{back['supp']}}}
-
-\authorcontributions{{{back['contrib']}}}
+{supp_tex}\authorcontributions{{{back['contrib']}}}
 
 \funding{{{back['funding']}}}
 
@@ -232,6 +271,7 @@ The following abbreviations are used in this manuscript:\\
 \end{{tabular}}
 }}
 
+{app_tex}
 \begin{{adjustwidth}}{{-\extralength}}{{0cm}}
 \reftitle{{References}}
 \begin{{thebibliography}}{{999}}

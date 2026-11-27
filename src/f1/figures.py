@@ -53,10 +53,10 @@ def fig_map():
     from data_ext import load_bd2012
     d = load_wells()
     u = load_bd2012()
-    cols = {"≤10 µg/L": "#2c7fb8", "11–50 µg/L": "#fdae61", ">50 µg/L": "#d7191c"}
-    fig, axes = plt.subplots(1, 2, figsize=(7.4, 3.9), gridspec_kw=dict(width_ratios=[1, 1.25]))
-    for ax, df, title in ((axes[0], d, "(a) 2000–01 laboratory census (6,595 wells)"),
-                          (axes[1], u, "(b) 2012–13 upazila field-kit survey (46,976 wells)")):
+    cols = {"≤10 µg/L": "#2c7fb8", "11-50 µg/L": "#fdae61", ">50 µg/L": "#d7191c"}
+    fig, axes = plt.subplots(1, 2, figsize=(7.4, 4.3), gridspec_kw=dict(width_ratios=[1, 1.25]))
+    for ax, df, title in ((axes[0], d, "(a) 2000-01 laboratory census (6,595 wells)"),
+                          (axes[1], u, "(b) 2012-13 upazila field-kit survey (46,976 wells)")):
         cat = pd.cut(df.as_ppb, [-1, 10, 50, 1e9], labels=list(cols))
         for c, g in df.groupby(cat, observed=True):
             ax.scatter(g.x / 1000, g.y / 1000, s=0.6 if len(df) > 10000 else 1.2, c=cols[c], linewidths=0,
@@ -73,15 +73,15 @@ def fig_map():
             lat0, lon0 = u["lat"].mean(), u["lon"].mean()
             C = np.c_[(c.Longitude - lon0) * 111_320 * np.cos(np.radians(lat0)), (c.Latitude - lat0) * 110_574] / 1000
             hc = C[ConvexHull(C).vertices]; hc = np.vstack([hc, hc[:1]])
-            ax.plot(hc[:, 0], hc[:, 1], color="#6a3d9a", lw=1.2, label="2000–01 census area")
-        ax.set_aspect("equal"); ax.set_title(title, fontsize=8)
-        ax.set_xlabel("Easting (km)"); ax.set_ylabel("Northing (km)")
+            ax.plot(hc[:, 0], hc[:, 1], color="#6a3d9a", lw=1.2, label="2000-01 census area")
+        ax.set_aspect("equal"); ax.set_title(title, fontsize=10)
+        ax.set_xlabel("Easting (km)", fontsize=10); ax.set_ylabel("Northing (km)", fontsize=10)
         x0, x1 = ax.get_xlim(); y0, y1 = ax.get_ylim()
         bx, by = x0 + 0.05 * (x1 - x0), y0 + 0.05 * (y1 - y0)
         ax.plot([bx, bx + 1], [by, by], color="black", lw=2)
-        ax.text(bx + 0.5, by + 0.03 * (y1 - y0), "1 km", ha="center", fontsize=6.5)
+        ax.text(bx + 0.5, by + 0.03 * (y1 - y0), "1 km", ha="center", fontsize=9)
         h, l = ax.get_legend_handles_labels()
-        ax.legend(h, l, markerscale=8, frameon=False, fontsize=6.5, loc="upper center", bbox_to_anchor=(0.5, -0.22), ncol=3)
+        ax.legend(h, l, markerscale=9, frameon=False, fontsize=8.5, loc="upper center", bbox_to_anchor=(0.5, -0.2), ncol=2)
     fig.tight_layout()
     fig.savefig(FIG / "fig1_map.png")
     plt.close(fig)

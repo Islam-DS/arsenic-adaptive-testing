@@ -31,11 +31,13 @@ See [`data/README.md`](data/README.md) for sources, licences and checksums:
 | `sim2.py` | campaign state, field-kit error model and learners (Gaussian process, kNN, random forest, LightGBM) |
 | `sim4.py` | campaign simulator used in the article: policies, protection outcome, misled households, capacity, distance decay, field realism |
 | `experiment4.py` | runs campaigns with cross-fitting over repeated random splits |
-| `figures6.py` | primary endpoint (Holm-adjusted), Tables S1-S3 and Figures 2-6 |
+| `figures6.py` | primary endpoint (Holm-adjusted), Tables A1-A3 and Figures 2-6 |
+| `inference.py` | permutation and Wilcoxon tests, confirmatory blocks, super-blocks, Monte Carlo error, costings and measurement sensitivity (Tables A5-A7) and Figure A1 |
 | `figures.py` | Figure 1 (map) |
+| `audit.py` | independent recomputation of Table 2, Holm and permutation tests, costs and Table A7 from the campaign results; checks every reported number (results/f1_v6_audit.csv) |
 
 Earlier development versions of the simulator and runner (`sim3.py`, `experiment.py`, `experiment3.py`) are
-kept because `sim4.py` and `experiment4.py` import parts of them; the design history is summarised in Table S4 of the
+kept because `sim4.py` and `experiment4.py` import parts of them; the design history is summarised in Table A4 of the
 article. `tests/test_sim2.py` contains sanity tests on synthetic blocks.
 
 ## Reproduce
@@ -44,8 +46,11 @@ Python 3.14 with numpy, scipy, pandas, scikit-learn 1.8, lightgbm 4.6, joblib, m
 
 ```
 bash results/run_v6.sh                  # all campaigns used in the article (several hours on 14 cores)
-python -X utf8 src/f1/figures6.py       # primary endpoint, Tables S1-S3, Figures 2-6
+python -X utf8 src/f1/figures6.py       # primary endpoint, Tables A1-A3, Figures 2-6
+python -X utf8 src/f1/inference.py      # further tests, costings, Tables A5-A7, Figure A1
+python -X utf8 src/f1/audit.py          # independent check of every reported number
 python -X utf8 -c "import sys; sys.path.insert(0, 'src/f1'); import figures; figures.fig_map()"   # Figure 1
+python -X utf8 manuscript/make_appendix.py  # Appendices A-B (Figure A1, Tables A1-A7) from the results
 python -X utf8 manuscript/build_latex.py   # LaTeX manuscript (MDPI template) and PDF
 ```
 

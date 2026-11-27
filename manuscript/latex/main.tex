@@ -1,4 +1,7 @@
 \documentclass[sustainability,article,submit,pdftex,moreauthors]{Definitions/mdpi}
+\usepackage{longtable}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
 \makeatletter\hyperrefpackage
 \patchcmd{\NAT@citexnum}{--\NAT@penalty}{-\NAT@penalty}{}{}
 \makeatother
@@ -31,20 +34,20 @@ $^{1}$ \quad Al-Farabi Kazakh National University, Almaty, Kazakhstan; \href{mai
 $^{2}$ \quad Riga Technical University, Riga, Latvia; \href{mailto:Nadezda.Kunicina@rtu.lv}{Nadezda.Kunicina@rtu.lv}}
 \corres{Correspondence: \href{mailto:islam_md_mahbubul@live.kaznu.kz}{islam\_md\_mahbubul@live.kaznu.kz} (M.M.I.); \href{mailto:Nadezda.Kunicina@rtu.lv}{Nadezda.Kunicina@rtu.lv} (N.K.)}
 
-\abstract{Testing tube wells for arsenic and directing households with unsafe wells to nearby safe ones cheaply cuts exposure in Bangladesh, but budgets are limited. We asked whether testing order can protect more exposed households for the same effort. We replayed testing campaigns, including walking time and field-kit error, on two surveys of tube wells in Araihazar upazila, a laboratory census of 6,595 wells (2000-2001) and a field-kit survey of 46,976 wells (2012-2013). A household counted as protected once its own unsafe well had been tested and a safe tested well was within 100 m. A policy that chooses each next well by its expected gain in protected households per minute, updating a Gaussian-process model of arsenic after every result, protected 61\% (census) and 53\% (upazila survey) more exposed households than door-to-door testing for the same effort, and 33-41\% more than an advance plan based on well depth; all six primary comparisons were significant after Holm correction. Gains over door-to-door testing persisted with daily travel and absent owners, and over both comparators after ten days with capacity limits and distance-dependent switching; the cost per person protected fell from US\$0.56-0.62 to US\$0.35-0.41. Adaptive testing could stretch testing budgets towards SDG target 6.1.}
+\abstract{Testing tube wells for arsenic and directing households to nearby safe wells cheaply cuts exposure in Bangladesh, but budgets are limited. Can testing order protect more exposed households? We simulated testing campaigns, with walking time and kit error, on two well surveys in Araihazar upazila, a laboratory census of 6,595 wells (2000-2001) and a field-kit survey of 46,976 wells (2012-2013). A household was protected once its unsafe well had been tested and a tested safe well lay within 100 m. A policy that chooses each next well by its expected gain in protected households per minute, updating a Gaussian-process arsenic model after every result, protected 61\% (census) and 53\% (upazila survey) more exposed households than door-to-door testing for the same effort, and 33-41\% more than a depth-based advance plan (Holm-adjusted p $\leq$ 0.011). Gains were positive in all five census blocks held out from design, though not individually significant against door-to-door testing, and held across 52 blocks of the larger survey, with capacity limits and distance-dependent switching, and over door-to-door testing with daily travel and absent owners. The simulated field cost per person protected fell from US\$0.56-0.62 to US\$0.35-0.41. Adaptive testing could stretch budgets towards SDG target 6.1.}
 \keyword{arsenic; groundwater; tube wells; field testing; adaptive sampling; active learning; Gaussian process; Bangladesh; SDG 6.1}
 
 \begin{document}
 
 \section{Introduction}
 
-Arsenic in shallow groundwater remains one of the largest chemical threats to drinking water. In Bangladesh, about 20 million people drank water above the national standard of 50 \textmu{}g/L in 2009 and about 45 million above the World Health Organization (WHO) guideline of 10 \textmu{}g/L ~\cite{Flanagan2012}. Exposure raises mortality from cancers and cardiovascular disease ~\cite{Argos2010,Naujokas2013}, and lower exposure is associated with lower mortality ~\cite{Wu2025}. An estimated 24-26 million people still drank water above 10 \textmu{}g/L in 2019-2025 ~\cite{Pakkos2026,Hoque2026}, and arsenic-safe water is part of the "safely managed" drinking water targeted by SDG 6.1 ~\cite{Bain2018,Fischer2020}.
+Arsenic in shallow groundwater remains one of the largest chemical threats to drinking water. In Bangladesh, about 20 million people drank water above the national standard of 50 \textmu{}g/L in 2009 and about 45 million above the World Health Organization (WHO) guideline of 10 \textmu{}g/L ~\cite{Flanagan2012}. Exposure raises mortality from cancers and cardiovascular disease ~\cite{Argos2010,Naujokas2013}, and lower exposure is associated with lower mortality ~\cite{Wu2025}. About 24 million people still drank water above 10 \textmu{}g/L in 2019 ~\cite{Pakkos2026}, and a preprint estimates a similar number in 2025 ~\cite{Hoque2026}; and arsenic-safe water is part of the "safely managed" drinking water targeted by SDG 6.1 ~\cite{Bain2018,Fischer2020}.
 
 The cheapest mitigation is information. Arsenic varies sharply between neighbouring wells ~\cite{vanGeen2003,Yu2003}, so a household with an unsafe well often has a safe well within walking distance. When wells are tested and labelled, many households switch ~\cite{Madajewicz2007,Opar2007,vanGeen2019} and exposure falls ~\cite{Chen2007,Huhmann2019}; in Araihazar, testing was the most cost-effective intervention over 18 years ~\cite{Jamil2019}. But coverage decays as new wells are installed, households forget results and concentrations change ~\cite{George2012b,vanGeen2014,Pfaff2017,Yao2021}, and campaigns must be repeated: the 2021-2023 national campaign tested 6.3 million wells, and its authors call for continuous, paid testing ~\cite{Khan2025}.
 
 With limited budgets, the order of testing matters. Current practice is a door-to-door sweep ~\cite{vanGeen2014,Johnston2007}, which is efficient on the road but blind to where safe water is likely. Geostatistical and machine-learning maps predict arsenic ~\cite{Gaus2003,Shamsudduha2015,Podgorski2020,Tan2020,Mehrabi2025,Zhao2024} and maps and available data sources are proposed to prioritise testing ~\cite{Podgorski2020,Azad2026,Katner2015}, but they rank areas once, before any result is known, and predict concentrations rather than whether an exposed household learns that its well is unsafe and has a safe alternative nearby.
 
-Kit results arrive within minutes ~\cite{George2012}, so a campaign can learn as it goes. Sequential designs have been developed for related goals. They include adaptive cluster sampling ~\cite{Thompson1990}, geostatistical sampling design ~\cite{Diggle2006,Yin2021} and its adaptive form ~\cite{Chipeta2016,Kabaghe2017}, the choice of the next groundwater monitoring well ~\cite{Lykkegaard2022}, active learning, active search and Bayesian optimisation ~\cite{Settles2012,Garnett2012,Srinivas2012,Shahriari2016}, greedy adaptive policies ~\cite{Golovin2011}, data-driven targeting of inspections ~\cite{Hino2018,Abernethy2018}, adaptive inspection for disease vectors ~\cite{Case2022} and adaptive allocation of testing sites ~\cite{Hsiao2025}. Their aim is a precise map, the detection of hazards or access to testing. In private-well programmes, testing has been targeted by fixed rules at households near known high-arsenic wells ~\cite{Flanagan2020} or at wells whose earlier results exceed a new standard ~\cite{ONeill2023}. Arsenic mitigation depends instead on pairs of wells, because an exposed household is helped only when its own unsafe well is tested and a safe well is found near it. Earlier simulations on Araihazar wells studied switching after every well had been tested ~\cite{Gelman2004,Jameel2021}; to our knowledge, none has chosen the next well to test, updating a model after each result, so as to protect the most exposed households. The two literatures have also developed largely apart. Of 5,212 Scopus records with reference lists retrieved by a search on arsenic testing or sampling in wells (1995-2026, searched November 2026; query in Table S4 note), none cites the geostatistical design studies of Diggle and Lophaven, Chipeta et al. or Kabaghe et al. ~\cite{Diggle2006,Chipeta2016,Kabaghe2017}.
+Kit results arrive within minutes ~\cite{George2012}, so a campaign can learn as it goes. Sequential designs serve related goals: adaptive cluster sampling ~\cite{Thompson1990}, geostatistical sampling design ~\cite{Diggle2006,Yin2021} and its adaptive form ~\cite{Chipeta2016,Kabaghe2017}, including groundwater monitoring ~\cite{Lykkegaard2022}, active learning and Bayesian optimisation ~\cite{Settles2012,Garnett2012,Srinivas2012,Shahriari2016,Golovin2011}, targeted inspections ~\cite{Hino2018,Abernethy2018,Case2022} and testing-site allocation ~\cite{Hsiao2025}. They aim at a precise map, the detection of hazards or access to testing. In private-well programmes, testing has been targeted by fixed rules at households near known high-arsenic wells ~\cite{Flanagan2020} or at wells whose earlier results exceed a new standard ~\cite{ONeill2023}. Arsenic mitigation depends instead on pairs of wells, because an exposed household is helped only when its own unsafe well is tested and a safe well is found near it. Earlier simulations on Araihazar wells studied switching after every well had been tested ~\cite{Gelman2004,Jameel2021}; to our knowledge, none has chosen the next well to test, updating a model after each result, so as to protect the most exposed households. The two literatures have also developed largely apart: none of 5,212 Scopus records on arsenic testing or sampling in wells (1995-2026; query in Table A4 note) cites the geostatistical design studies ~\cite{Diggle2006,Chipeta2016,Kabaghe2017}.
 
 We answer this question by replaying testing campaigns on two surveys of Araihazar upazila carried out twelve years apart, a laboratory census of 6,595 wells (2000-2001) ~\cite{vanGeen2003,Jameel2021data} and a field-kit survey of 46,976 wells (2012-2013) ~\cite{vanGeen2014,Huang2022,Knappett2024data}. We compare door-to-door testing and a depth-based advance plan with policies that re-plan after every result, with and without a spatial model of arsenic, and ask how many more exposed households are protected for the same effort, why, under which conditions, at what cost and for whom.
 
@@ -52,23 +55,41 @@ We answer this question by replaying testing campaigns on two surveys of Araihaz
 
 \subsection{Data}
 
-\textbf{2000-2001 census.} The public release ~\cite{Jameel2021data} (CC BY 4.0) covers about 25 km\textsuperscript{2} of Araihazar upazila, Narayanganj district (convex hull 35 km\textsuperscript{2}) and contains 6,605 wells with laboratory arsenic, coordinates and depth; 10 wells without coordinates were removed, and 141 wells without depth were kept as a separate class. A second file holds 944 wells measured with both an ITS Econo-Quick field kit (categories 0-1000 \textmu{}g/L) and in the laboratory ~\cite{vanGeen2014,Jameel2021}; it defines the kit-error model.
-
-\textbf{2012-2013 upazila survey.} The public release ~\cite{Knappett2024data} (CC BY 4.0) contains 46,976 of the 48,790 wells tested with the same kit across the upazila (226 km\textsuperscript{2}), with GPS coordinates and owner-reported depth and no personal identifiers. Of 1,187 wells linked by identifier to the census, 1,076 links whose recorded positions were within 100 m were retained.
-
-\textbf{National context.} The village summary of the 2000-2005 national survey (3.96 million wells, 44,865 villages) ~\cite{Jamil2019} was used only for context. Each well is treated as one unit of households (about 8 people per well ~\cite{Jamil2019}).
+\textbf{2000-2001 census.} The public release ~\cite{Jameel2021data} (CC BY 4.0) covers about 25 km\textsuperscript{2} of Araihazar upazila, Narayanganj district, with laboratory arsenic, coordinates and depth for 6,605 wells; 10 wells without coordinates were removed and 141 without depth were kept as a separate class. A second file holds 944 wells measured with both an ITS Econo-Quick field kit and in the laboratory ~\cite{vanGeen2014,Jameel2021}, which defines the kit-error model. \textbf{2012-2013 upazila survey.} The public release ~\cite{Knappett2024data} (CC BY 4.0) holds 46,976 of the 48,790 wells tested with the same kit across the upazila (226 km\textsuperscript{2}), with GPS coordinates and owner-reported depth; 1,076 of the 1,187 wells linked by identifier to the census lay within 100 m of their census position. The village summary of the 2000-2005 national survey ~\cite{Jamil2019} was used only for context. Each well stands for one unit of households (about 8 people ~\cite{Jamil2019}).
 
 \subsection{Evaluation design}
 
-Each area was divided into 2 km $\times$ 2 km blocks, merging blocks of fewer than 150 wells with the nearest larger block: 10 census blocks (370-1,203 wells) and 52 upazila blocks (151-2,639 wells). Fourteen upazila blocks overlap the census area (at least 20 wells within 100 m of a census well); the other 38 are also reported separately, as declared before the final runs. All design choices (score, look-ahead weights, learners) were made on one random half of the census blocks with leave-one-block-out fitting; results for the other five blocks alone are also reported. Models were then fitted on one half of the blocks and evaluated on the other, in both directions (cross-fitting), over 5 random splits (census) and 2 (upazila); each block's result is the mean over splits and runs. Spatial blocking avoids the optimism of random cross-validation ~\cite{Tziachris2023}. Table S4 gives the design history.
+Each area was divided into 2 km $\times$ 2 km blocks, merging blocks of fewer than 150 wells into the nearest larger block (Table 1). All design choices (score, look-ahead weights, learner) were made on five randomly chosen census blocks (development blocks) with leave-one-block-out fitting. The other five census blocks (confirmatory blocks) and all 52 upazila blocks were never used for a design choice, and the upazila survey, analysed without re-tuning, is a replication in a larger, later survey with wider spatial coverage (not an external geographical validation, as both surveys are from Araihazar); its 38 blocks outside the census area (fewer than 20 wells within 100 m of a census well) are also reported separately. In the final runs, the blocks of a survey were split at random into halves; the depth prior and the learner were fitted on one half and campaigns were run on the other, in both directions (cross-fitting), so no block was evaluated by a model fitted on its own wells. Splits were repeated (Table 1), and a run fixes the starting well and the kit draws. Each block's result is the mean of its runs. Blocks are the units of inference, because runs and splits average out simulation noise but add no independent observations. Spatial blocking avoids the optimism of random cross-validation ~\cite{Tziachris2023}; Table A4 gives the design history.
+
+\begin{table}[!htbp]
+\caption{Data and evaluation design.}
+\label{tab1}
+\footnotesize
+\begin{adjustwidth}{-\extralength}{0cm}\centering
+\begin{tabular}{p{3.4cm}p{5.2cm}p{5.2cm}}
+\toprule
+\textbf{Item} & \textbf{2000-2001 census} & \textbf{2012-2013 upazila survey} \\
+\midrule
+Wells; area & 6,595; about 25 km\textsuperscript{2} & 46,976; 226 km\textsuperscript{2} \\
+Wells above 50 \textmu{}g/L & 52\% & 45\% \\
+True arsenic & laboratory value & laboratory value imputed from 944 kit-laboratory pairs \\
+What a team observes & kit reading drawn from the 944 pairs & recorded kit reading \\
+Model inputs & coordinates, depth class, results so far & as census (owner-reported depth) \\
+Blocks (2 km) & 10 of 370-1,203 wells (5 development, 5 confirmatory) & 52 of 151-2,639 wells (38 outside the census area) \\
+Runs per block & 5 splits $\times$ 4 runs & 2 splits $\times$ 3 runs \\
+Role & design and evaluation & replication without re-tuning \\
+\bottomrule
+\end{tabular}
+\end{adjustwidth}
+\end{table}
 
 \subsection{Campaign simulator and outcomes}
 
-A field team starts at a random well in a block and tests wells in the order chosen by its policy. Walking time is the straight-line distance $\times$ 1.3 at 3 km/h; each test takes 20 minutes on site ~\cite{George2012,vanGeen2019}; a team-day has 360 minutes. Teams tested about 16-17 wells per day, and about 13-15 under the field-realism scenario of Section 2.6 (12 per day were reported in the field ~\cite{vanGeen2014}). In the census, kit readings are drawn from the 25 paired wells with the closest laboratory values ~\cite{Jameel2021}. In the upazila survey, the recorded kit reading is observed and a laboratory value is drawn for each well and run from pairs with the same reading.
+A field team starts at a random well in a block and tests wells in the order chosen by its policy. Walking time is the straight-line distance $\times$ 1.3 at 3 km/h; each test takes 20 minutes on site ~\cite{George2012,vanGeen2019}; a team-day has 360 minutes. Teams tested about 16-17 wells per day (13-15 under field realism, Section 2.6; 12 per day were reported in the field ~\cite{vanGeen2014}). Kit readings (census) and laboratory values (upazila survey) are drawn from the 944 pairs as in Table 1 and Appendix A ~\cite{Jameel2021}.
 
 A household is \textbf{exposed} if its own well is truly unsafe (>50 \textmu{}g/L, or >10 \textmu{}g/L). It is \textbf{protected} once its own well has been tested and read unsafe and a tested well within \textit{r} = 100 m (50 and 200 m in sensitivity analyses ~\cite{Opar2007,Jameel2021}) has read safe and is truly safe. It is \textbf{misled} if its own unsafe well read safe or every well it was directed to is unsafe; a \textbf{false alarm} is a safe well that read unsafe. Two further outcomes relax the switching assumption. One limits each safe well to five households (\textbf{capacity}), and the other gives \textbf{expected switching} with a probability of exp(-\textit{d}/83 m) (0.3 at 100 m ~\cite{Jameel2021}).
 
-The \textbf{primary endpoint} is the share of exposed households protected after 5 team-days per 1,000 wells (normalising effort by block size), at 50 \textmu{}g/L and 100 m; fixed horizons (5, 10, 20 days) are secondary. Cost per person protected is total cost (US\$28.80 per team-day, i.e. 12 tests at US\$2.40 ~\cite{vanGeen2014,Jamil2019}) divided by persons protected. Equity is protection by within-block tertile of the share of safe wells within 200 m.
+The \textbf{primary endpoint} is the share of exposed households protected after 5 team-days per 1,000 wells (normalising effort by block size), at 50 \textmu{}g/L and 100 m; fixed horizons (5, 10, 20 days) are secondary. The estimated field cost per person protected is the cost of the field effort divided by the persons counted as protected in the simulation; it is not a cost per observed switch or per unit of exposure averted. The headline costing prices field time at US\$28.80 per team-day, the all-in cost (labour, supervision, supplies and placard) of the 12 tests one tester completed per day in Araihazar at US\$2.40 each ~\cite{vanGeen2014,Jamil2019}; because labour dominates, a team that tests more wells costs the same per day. Two alternatives add US\$0.17 of kit consumables per test ~\cite{George2012} or charge US\$2.40 for every test performed (Appendix A). Transport, training, smartphones and programme management are excluded. Equity is protection by within-block tertile of the share of safe wells within 200 m.
 
 \subsection{Testing policies}
 
@@ -76,11 +97,11 @@ A test that reads unsafe informs its household, which is protected at once if a 
 
 
 \begin{equation}
-s_j = \frac{p_j\,(E_j + \lambda U_j) + (1-p_j)\,(S_j + \lambda Q_j)}{t_\mathrm{test} + t_\mathrm{walk}(j)},
+g_j = \frac{p_j\,(E_j + \lambda U_j) + (1-p_j)\,(S_j + \lambda Q_j)}{t_\mathrm{test} + t_\mathrm{walk}(j)},
 \end{equation}
 
 
-where $p_j$ is the probability that \textit{j} is safe; $E_j$ the informed neighbours without a source; $S_j$ the probability that a source already exists near \textit{j}; $U_j$ the expected untested unsafe neighbours without a source; $Q_j$ the probability that an untested neighbour is safe; and $\lambda$ the look-ahead weight. Policies differ in what they know:
+where $g_j$ is the score, $p_j$ the probability that well \textit{j} is safe and $N(j)$ the set of wells within \textit{r} of \textit{j}. Each household \textit{i} is in one of three states: its well is untested ($\mathrm{unt}_i = 1$); its well has been tested and read safe; or its well has been tested and read unsafe, so the household is informed ($\mathrm{inf}_i = 1$). An informed household is protected once a well within \textit{r} has also read safe and is truly safe. Let $c_i$ be the probability that household \textit{i} already has such a source, that is, a tested well within \textit{r} that read safe ($c_i = 1$ once one exists; the static plan, which ignores results, computes it from the $p_k$ of tested wells). A safe reading at \textit{j} protects the informed households near it that have no source, $E_j = \sum_{i \in N(j)} \mathrm{inf}_i (1 - c_i)$, and gives a source to untested, probably unsafe neighbours, $U_j = \sum_{i \in N(j), i \neq j} \mathrm{unt}_i (1 - c_i)(1 - p_i)$. An unsafe reading informs the household of \textit{j}, which is protected at once if it already has a source, with probability $S_j = c_j$, or later if an untested neighbour proves safe, with probability $Q_j = 1 - \prod_{i \in N(j), i \neq j, \mathrm{unt}_i = 1} (1 - p_i)$. $U_j$ and $Q_j$ are look-ahead terms weighted by $\lambda$. A household with a source has $c_i = 1$ and drops out of $E_j$ and $U_j$, so it is never counted twice. Policies differ in what they know (Algorithm 1; details in Appendix A):
 
 \begin{itemize}[leftmargin=*,labelsep=5.8mm]
 \item \textbf{Door-to-door sweep:} nearest untested well (current practice ~\cite{vanGeen2014}).
@@ -94,9 +115,22 @@ where $p_j$ is the probability that \textit{j} is safe; $E_j$ the informed neigh
 
 $\lambda$ was tuned on the development blocks for the static, re-planning, adaptive and learning policies (static 0.05; the others 0.1); the oracle used 0.1. All policies share each run's starting well and kit draws, so comparisons are paired.
 
+\begin{figure}[H]
+\noindent\fbox{\begin{minipage}{0.96\linewidth}\small
+\textbf{Algorithm 1.} One testing campaign in a block under a targeted policy.
+\begin{enumerate}[leftmargin=*,labelsep=2mm,itemsep=0pt]
+\item Fit the depth prior and the learner on the other half of the blocks; start the team at a random well (at the base well under field realism).
+\item For every untested well \textit{j}, compute $p_j$ (from depth, from the learner given all results so far, or a constant, depending on the policy), then $E_j$, $S_j$, $U_j$, $Q_j$ and the score $g_j$ with the walking time from the team's position (Equation 1).
+\item Walk to the well with the highest score and test it (20 min); the kit reading is known at once.
+\item If it reads unsafe, inform its household; if it reads safe, mark it as a source for every household within \textit{r}. Add the reading to the learner's data.
+\item Repeat steps 2-4 until the effort is spent, recording the outcomes at fixed marks.
+\end{enumerate}
+\end{minipage}}
+\end{figure}
+
 \subsection{Learning models}
 
-Learners predict P(safe) for untested wells from depth and nearby readings, with deep (>100 ft) and shallow wells as separate layers ~\cite{vanGeen2003} (missing depth treated as shallow). A depth prior gives the mean and spread of log$_{10}$ arsenic in seven depth classes. The headline learner is a \textbf{Gaussian process} (kriging) on the residual from the prior, with an exponential covariance and nugget fitted by maximum likelihood on 1,500 shallow wells of the fitting half (scikit-learn 1.8); in the upazila survey it is fitted to kit readings. k-nearest neighbours, random forest and LightGBM were also compared (Table S2).
+Learners predict the probability that an untested well is safe from depth and the results so far. Arsenic values are expressed as $y = \log_{10} \max(\mathrm{As}, 1)$, so laboratory values below 1 \textmu{}g/L and kit readings of 0 (38\% of upazila readings) are set to 1 \textmu{}g/L ($y = 0$). Deep (>100 ft) and shallow wells (including those of unknown depth) are separate layers that do not inform each other ~\cite{vanGeen2003}. A depth prior gives the mean $m$ and standard deviation $\sigma$ of $y$ in seven classes (<30, 30-50, 50-70, 70-100, 100-150 and $\geq$150 ft, and unknown), estimated on the fitting half; without results, $p_j = \Phi((\log_{10} T - m_j)/\sigma_j)$ for threshold \textit{T}. The headline learner is a \textbf{Gaussian process} (simple kriging) of the residual $z = y - m$ with covariance $C(h) = \sigma_s^2 \exp(-h/\rho)$ between wells \textit{h} metres apart (planar coordinates, not standardised) and a nugget $\tau^2$ for variation between neighbouring wells at scales below their spacing and, when the model is fitted to kit readings, kit error. For an untested well \textit{j} and the vector $\mathbf{z}_t$ of residuals at the tested wells of its layer, with covariance matrix $\mathbf{K}$ and covariances $\mathbf{k}_j$ to \textit{j}, the posterior mean and variance are $\mu_j = \mathbf{k}_j^{\top} (\mathbf{K} + \tau^2 \mathbf{I})^{-1} \mathbf{z}_t$ and $v_j = \sigma_s^2 - \mathbf{k}_j^{\top} (\mathbf{K} + \tau^2 \mathbf{I})^{-1} \mathbf{k}_j$, and $p_j = \Phi((\log_{10} T - m_j - \mu_j)/(\sigma_j \sqrt{(v_j + \tau^2)/(\sigma_s^2 + \tau^2)}))$, which equals the prior when no nearby well has been tested. Sill, range and nugget were fitted by maximum likelihood (scikit-learn 1.8) on 1,500 shallow wells drawn at random from the fitting half ($\sigma_s^2 = 0.20$, $\rho = 283$ m and $\tau^2 = 0.13$ on the census development half). The subsample keeps the cubic cost of exact fitting small, and shallow wells are used because they make up 84\% of census wells and include most unsafe wells; deep wells (82\% safe at 50 \textmu{}g/L) use the same parameters, a simplification that matters little because their probabilities stay close to the high prior. In a campaign the Gaussian process is conditioned on the kit readings of tested wells, transformed in the same way; in the census it is fitted to laboratory values and in the upazila survey to the recorded kit readings. Kit error is not modelled separately: the upazila nugget includes it, the census nugget does not. Sensitivity analyses added the kit-error variance of the 944 pairs (0.11 in squared $\log_{10}$ units) to the census nugget, or set kit readings of 0 to 5 \textmu{}g/L, half the lowest non-zero category. k-nearest neighbours, random forest and LightGBM were also compared (Table A2).
 
 \subsection{Further scenarios}
 
@@ -104,15 +138,15 @@ In the census we varied one condition at a time: \textbf{field realism} (daily r
 
 \subsection{Statistical analysis}
 
-Blocks are the unit of analysis. For each comparison we report the mean paired difference with a 95\% \textit{t}-interval and paired \textit{t}-test, the blocks with a positive difference, and the well-weighted (pooled) share over the whole area. The primary family (learning versus door-to-door, static and adaptive, in both surveys) was declared before the final runs and Holm-adjusted; other analyses are secondary. Analyses used Python 3.14, NumPy, SciPy, scikit-learn 1.8 and LightGBM 4.6. During the preparation of this study, the authors used Claude Opus 5.5 (Anthropic) to assist with code, analysis and drafting. The authors have reviewed and edited the output and take full responsibility for the content of this publication.
+Blocks are the units of inference. For each comparison we report the mean paired difference over blocks with a 95\% \textit{t}-interval and paired \textit{t}-test, the blocks with a positive difference and the well-weighted (pooled) share. The primary family (learning versus door-to-door, static and adaptive, in both surveys) was declared before the final runs and Holm-adjusted; other analyses are secondary. As checks on a \textit{t}-test over few blocks, the primary comparisons were also tested by a paired sign-flip permutation test (exact in the census) and a Wilcoxon signed-rank test, with each block left out in turn, and with the upazila blocks aggregated into 17 super-blocks of 4 km $\times$ 4 km to allow for spatial dependence; the Monte Carlo error of each block's mean was compared with the spread between blocks (Appendix A). Analyses used Python 3.14, NumPy, SciPy, scikit-learn 1.8 and LightGBM 4.6. During the preparation of this study, the authors used Claude Opus 5.5 (Anthropic) to assist with code, analysis and drafting. The authors have reviewed and edited the output and take full responsibility for the content of this publication.
 
 \section{Results}
 
 \subsection{The wells}
 
-In the census, 52\% of wells exceeded 50 \textmu{}g/L and 74\% exceeded 10 \textmu{}g/L, yet safe and unsafe wells were interleaved. The median well had 18 others within 100 m, and 90\% had another safe well within 100 m (Figure 1). Wells shallower than 30 ft or deeper than 100 ft were far more often safe. The upazila survey was denser (median 32 wells within 100 m), with 45\% of wells above 50 \textmu{}g/L and 56\% above 10 \textmu{}g/L.
+In the census, 52\% of wells exceeded 50 \textmu{}g/L and 74\% exceeded 10 \textmu{}g/L, yet safe and unsafe wells were interleaved. The median well had 18 others within 100 m, and 90\% had a safe well within 100 m (Figure 1). Wells shallower than 30 ft or deeper than 100 ft were more often safe. The upazila survey was denser (median 32 wells within 100 m; 45\% above 50 \textmu{}g/L and 56\% above 10 \textmu{}g/L).
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=\textwidth]{figures/fig1_map.png}
 \caption{Tube wells in Araihazar, coloured by arsenic: (a) 2000-2001 laboratory census; (b) 2012-2013 upazila field-kit survey. Outlines show the 2 km blocks (dashed and solid lines show the two halves of one split); the purple line in (b) marks the census area.}
@@ -121,21 +155,24 @@ In the census, 52\% of wells exceeded 50 \textmu{}g/L and 74\% exceeded 10 \text
 
 \subsection{Learning where to test protects more exposed households}
 
-For the same effort of 5 team-days per 1,000 wells, the learning policy protected 10.3\% of exposed households per block in the census and 15.6\% in the upazila survey, more than door-to-door testing, the static plan and the adaptive policy in both (Table 1; all six comparisons significant after Holm correction, adjusted \textit{p} $\leq$ 0.011). Over the whole area, it protected 61\% and 53\% more exposed households than door-to-door testing, 41\% and 33\% more than the static plan and 17\% and 20\% more than the adaptive policy. In the five census blocks never used for design choices the gains over door-to-door testing, the static plan and the adaptive policy were 4.5 (-0.1 to 9.0), 4.2 (1.0-7.5) and 1.1 (0.3-1.9) points, positive in all five. The advantage grew with effort (Figure 2). After ten team-days per block the learning policy had protected 33.6\% of exposed households in the census (door-to-door 22.0\%, static 24.0\%, adaptive 28.8\%; 10/10 blocks) and 37.0\% in the upazila survey (21.5\%, 28.6\%, 32.0\%; 45-50/52 blocks).
+For the same effort of 5 team-days per 1,000 wells, the learning policy protected 10.3\% of exposed households per block in the census and 15.6\% in the upazila survey, more than door-to-door testing, the static plan and the adaptive policy in both (Table 2; Holm-adjusted \textit{p} $\leq$ 0.011). Over the whole area, it protected 61\% and 53\% more exposed households than door-to-door testing, 41\% and 33\% more than the static plan and 17\% and 20\% more than the adaptive policy. The ten-block census estimate mixes development and confirmatory blocks; in the five confirmatory blocks, secondary evidence, the gains were positive in every block (Table 2), but with five blocks the smallest attainable two-sided permutation \textit{p} is 0.0625. Permutation and Wilcoxon tests agreed (Holm-adjusted \textit{p} $\leq$ 0.010), leaving out any one census block kept the gains within 3.3-4.4, 2.3-3.3 and 1.2-1.4 points, the gains held over the 17 upazila super-blocks (permutation \textit{p} $\leq$ 0.002), and simulation noise was small against the spread between blocks (Table A5, Figure A1). The advantage grew with effort (Figure 2). After ten team-days the learning policy had protected 33.6\% of exposed households in the census (door-to-door 22.0\%, static 24.0\%, adaptive 28.8\%; 10/10 blocks) and 37.0\% in the upazila survey (21.5\%, 28.6\%, 32.0\%; 45-50/52 blocks).
 
-\begin{table}[H]
-\caption{Primary endpoint. Exposed households protected (\%) after 5 team-days per 1,000 wells (50 \textmu{}g/L, 100 m), mean over blocks; paired difference (percentage points, 95\% \textit{t}-interval); Holm-adjusted \textit{p}; blocks favouring learning; relative gain in the well-weighted share.}
-\label{tab1}
+\begin{table}[!htbp]
+\caption{Primary endpoint. Exposed households protected (\%) after 5 team-days per 1,000 wells (50 \textmu{}g/L, 100 m), mean over blocks; paired difference (percentage points, 95\% \textit{t}-interval); \textit{p}, Holm-adjusted over the six primary comparisons, except in the confirmatory rows, which are secondary and give the unadjusted paired \textit{t}-test; blocks favouring learning; relative gain in the well-weighted share.}
+\label{tab2}
 \footnotesize
 \begin{adjustwidth}{-\extralength}{0cm}\centering
-\begin{tabular}{p{2.4cm}p{2.6cm}cccccc}
+\begin{tabular}{p{2.5cm}p{2.6cm}cccccc}
 \toprule
-\textbf{Survey} & \textbf{Comparator} & \textbf{Comparator (\%)} & \textbf{Learning (\%)} & \textbf{Difference (95\% CI)} & \textbf{Holm \textit{p}} & \textbf{Blocks} & \textbf{Relative gain} \\
+\textbf{Survey} & \textbf{Comparator} & \textbf{Comparator (\%)} & \textbf{Learning (\%)} & \textbf{Difference (95\% CI)} & \textbf{\textit{p}} & \textbf{Blocks} & \textbf{Relative gain} \\
 \midrule
 2000-01 census & Door-to-door sweep & 6.3 & 10.3 & 4.0 (1.5, 6.5) & 0.011 & 10/10 & +61\% \\
  & Static depth plan & 7.4 & 10.3 & 2.8 (0.9, 4.8) & 0.011 & 9/10 & +41\% \\
  & Adaptive & 9.0 & 10.3 & 1.3 (0.9, 1.8) & 0.001 & 10/10 & +17\% \\
-2012-13 upazila survey & Door-to-door sweep & 7.2 & 15.6 & 8.4 (4.4, 12.4) & 0.001 & 44/52 & +53\% \\
+Census, 5 confirmatory blocks (secondary, unadjusted \textit{p}) & Door-to-door sweep & 5.9 & 10.3 & 4.5 (-0.1, 9.0) & 0.052 & 5/5 & +71\% \\
+ & Static depth plan & 6.1 & 10.3 & 4.2 (1.0, 7.5) & 0.023 & 5/5 & +71\% \\
+ & Adaptive & 9.2 & 10.3 & 1.1 (0.3, 1.9) & 0.021 & 5/5 & +14\% \\
+2012-13 upazila & Door-to-door sweep & 7.2 & 15.6 & 8.4 (4.4, 12.4) & 0.001 & 44/52 & +53\% \\
  & Static depth plan & 12.1 & 15.6 & 3.5 (1.7, 5.2) & 0.001 & 39/52 & +33\% \\
  & Adaptive & 13.4 & 15.6 & 2.2 (0.8, 3.6) & 0.008 & 40/52 & +20\% \\
 \bottomrule
@@ -143,31 +180,31 @@ For the same effort of 5 team-days per 1,000 wells, the learning policy protecte
 \end{adjustwidth}
 \end{table}
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=\textwidth]{figures/fig2_protected.png}
 \caption{Exposed households protected by field-team days per block, 2000-2001 census (10 blocks; mean of 5 splits $\times$ 4 runs; bands, 95\% \textit{t}-intervals). Left: 50 \textmu{}g/L; right: 10 \textmu{}g/L.}
 \label{fig2}
 \end{figure}
 
-The cost per person protected was US\$0.35 under the learning policy in the census (static US\$0.49, door-to-door US\$0.56) and US\$0.41 in the upazila survey (US\$0.55, US\$0.62). At 10 \textmu{}g/L, the learning policy protected 3.8 and 4.1 points more than door-to-door testing (95\% CI 2.0-5.5; 2.4-5.8) and 2.2 and 2.3 more than the static plan (0.6-3.8; 1.3-3.4) in the two surveys; its lead over the adaptive policy was 0.5 (-0.1 to 1.1) and 1.4 (0.5-2.2) points (Table S1).
+The estimated field cost per person protected in the simulation was US\$0.35 under the learning policy in the census (adaptive US\$0.41, static US\$0.49, door-to-door US\$0.56) and US\$0.41 in the upazila survey (US\$0.49, US\$0.55, US\$0.62). Learning stayed the cheapest under both alternative costings, and its lead grew when every test was charged (US\$0.47 against US\$0.80 for door-to-door testing in the census), because its teams walked further and tested slightly fewer wells per day (16.2 against 17.2; Table A6). At 10 \textmu{}g/L, the learning policy protected 3.8 and 4.1 points more than door-to-door testing (95\% CI 2.0-5.5; 2.4-5.8) and 2.2 and 2.3 more than the static plan (0.6-3.8; 1.3-3.4) in the two surveys; its lead over the adaptive policy was 0.5 (-0.1 to 1.1) and 1.4 (0.5-2.2) points (Table A1).
 
 \subsection{Where the gain comes from}
 
-Re-planning without any information on where safe water is likely protected no more than the static plan (7.4\% vs 7.4\% in the census; 8.7\% vs 12.1\% in the upazila survey; Figure 3). Adding depth (adaptive) raised protection to 9.0\% and 13.4\%, and a spatial model updated with every result to 10.3\% and 15.6\%. The gain therefore needs both feedback and prediction. Uncertainty sampling protected 4.8\% and 9.9\%, 5.5-5.7 points fewer than learning, so a rule that sharpens the map protects few households. All four learners performed alike (Gaussian process ahead by $\leq$0.6 points, not significant; Table S2). The oracle protected 12.5\% and 26.0\%, showing room for better prediction.
+Re-planning without any information on where safe water is likely protected no more than the static plan (7.4\% vs 7.4\% in the census; 8.7\% vs 12.1\% in the upazila survey; Figure 3). Adding depth (adaptive) raised protection to 9.0\% and 13.4\%, and a spatial model updated with every result to 10.3\% and 15.6\%. The gain therefore needs both feedback and prediction. Uncertainty sampling protected 4.8\% and 9.9\%, 5.5-5.7 points fewer than learning, so a rule that sharpens the map protects few households. All four learners performed alike (Gaussian process ahead by $\leq$0.6 points, not significant; Table A2). The oracle protected 12.5\% and 26.0\%, showing room for better prediction.
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=\textwidth]{figures/fig3_decomposition.png}
-\caption{Exposed households protected after 5 team-days per 1,000 wells (50 \textmu{}g/L, 100 m) by policy in the two surveys.}
+\caption{Exposed households protected after 5 team-days per 1,000 wells (50 \textmu{}g/L, 100 m) by policy in the two surveys (mean over blocks; whiskers, 95\% \textit{t}-intervals of the levels, which vary between blocks; paired differences are in Table 2).}
 \label{fig3}
 \end{figure}
 
 \subsection{Replication across the upazila}
 
-The upazila survey replicated the census result without re-tuning (Table 1, Figure 4). In the 38 blocks outside the census area, the learning policy protected 8.3 points more than door-to-door testing (3.6-13.0; 31/38 blocks), 3.1 more than the static plan (0.8-5.4) and 2.2 more than the adaptive policy (0.3-4.1). Knowing the 2000-2001 values of linked wells changed any policy's protection after ten days by at most 1.1 points (learning 0.5 points lower) and, at the primary effort, narrowed learning's lead over the static plan in those 11 blocks from 4.7 to 3.6 points (1.6-5.6; 10/11 blocks).
+The larger upazila survey, with wider spatial coverage, replicated the census result without re-tuning (Table 2, Figure 4). In the 38 blocks outside the census area, the learning policy protected 8.3 points more than door-to-door testing (3.6-13.0; 31/38 blocks), 3.1 more than the static plan (0.8-5.4) and 2.2 more than the adaptive policy (0.3-4.1). Knowing the 2000-2001 values of linked wells changed any policy's protection after ten days by at most 1.1 points (learning 0.5 points lower) and, at the primary effort, narrowed learning's lead over the static plan in those 11 blocks from 4.7 to 3.6 points (1.6-5.6; 10/11 blocks).
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=\textwidth]{figures/fig4_upazila.png}
 \caption{Exposed households protected by field-team days per block, 2012-2013 upazila survey (52 blocks; mean of 2 splits $\times$ 3 runs; bands, 95\% \textit{t}-intervals). Left: 50 \textmu{}g/L; right: 10 \textmu{}g/L.}
@@ -176,9 +213,9 @@ The upazila survey replicated the census result without re-tuning (Table 1, Figu
 
 \subsection{Robustness}
 
-With daily return to a base and 15\% of owners absent (13-15 tests per day), the learning policy protected 2.5 points more than door-to-door testing at the primary effort (0.3-4.7) and 1.2 more than the static plan (-0.9 to 3.3, not significant); after ten days it protected 28.2\% against 19.0\%, 21.5\% and 24.5\% for door-to-door, static and adaptive (10/10 blocks). With a capacity of five households per safe well, it protected 5.8 and 5.0 points more than door-to-door and static after ten days in the census and 10.8 and 6.3 more in the upazila survey. With distance-dependent switching, 19.7\% of exposed households were expected to switch under learning against 14.1\% and 14.5\% (census), and 23.9\% against 15.6\% and 18.5\% (upazila). The gain over door-to-door testing also held at radii of 50 and 200 m, without kit error, with 10-minute tests and in thinned networks; the gain over the static plan was positive in all these cases and significant in all but the 200 m radius at the primary effort (1.2, -1.1 to 3.5; Table S1; selected analyses in Figure 5). When most wells in a small block are tested, policies converge.
+With daily return to a base and 15\% of owners absent (13-15 tests per day), the learning policy protected 2.5 points more than door-to-door testing at the primary effort (0.3-4.7) and 1.2 more than the static plan (-0.9 to 3.3, not significant); after ten days it protected 28.2\% against 19.0\%, 21.5\% and 24.5\% for door-to-door, static and adaptive (10/10 blocks). With a capacity of five households per safe well, it protected 5.8 and 5.0 points more than door-to-door and static after ten days in the census and 10.8 and 6.3 more in the upazila survey. With distance-dependent switching, 19.7\% of exposed households were expected to switch under learning against 14.1\% and 14.5\% (census), and 23.9\% against 15.6\% and 18.5\% (upazila). The gain over door-to-door testing also held at radii of 50 and 200 m, without kit error, with 10-minute tests and in thinned networks; the gain over the static plan was positive in all these cases and significant in all but the 200 m radius at the primary effort (1.2, -1.1 to 3.5; Table A1; selected analyses in Figure 5). When most wells in a small block are tested, policies converge. Setting kit readings of 0 to 5 \textmu{}g/L, or adding the kit-error variance to the census nugget, changed the learning policy's protection at the primary effort by at most 0.1 points and its gains over the three comparators by at most 0.3 points; at 50 \textmu{}g/L all gains remained significant (Table A7).
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=\textwidth]{figures/fig5_robustness.png}
 \caption{Learning minus door-to-door testing or the static plan across analyses (50 \textmu{}g/L; primary effort unless labelled 10 days; 95\% \textit{t}-intervals).}
@@ -189,7 +226,7 @@ With daily return to a base and 15\% of owners absent (13-15 tests per day), the
 
 After ten days at 50 \textmu{}g/L in the census, 4.4\% of exposed households were misled under learning (2.1\% by a false-safe own well, 2.4\% by false-safe sources), 3.9\% under the static plan and 3.7\% under door-to-door testing; false alarms affected 4.5-5.5\% of households with safe wells under all non-oracle policies. Declaring a well safe only when the kit read $\leq$25 \textmu{}g/L cut misled households under learning to 0.8\% while protection stayed at 32.3\% (Figure 6); door-to-door testing under the same rule protected 20.0\% (0.45\% misled), 12.3 points fewer (6.0-18.7; 10/10 blocks). The rule raises false alarms, from 4.6\% to 11.0\% under learning (12.8\% door-to-door) at 50 \textmu{}g/L and from 8.7\% to 24.3\% at 10 \textmu{}g/L, where protection fell from 25.4\% to 21.5\%.
 
-\begin{figure}[H]
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=\textwidth]{figures/fig6_harm.png}
 \caption{Protected versus misled exposed households after ten team-days (census, 100 m). Circles: safe if kit $\leq$ threshold; squares: safe if kit $\leq$ half the threshold.}
@@ -198,27 +235,27 @@ After ten days at 50 \textmu{}g/L in the census, 4.4\% of exposed households wer
 
 \subsection{Who is reached}
 
-At 50 \textmu{}g/L, in the third of locations with the fewest safe wells, the learning policy protected 32.9\% of exposed households after ten days in the census (static 16.0\%; difference 16.9, 9.4-24.3) and 40.0\% in the upazila survey (static 27.3\%; 12.7, 9.2-16.2). In the third with the most safe wells it protected fewer than the static plan (9.3 points fewer, 0.8-17.9, in the census; 5.8 fewer, 1.1-10.6, in the upazila survey) and, in the upazila survey, than door-to-door testing (7.9 fewer, 4.6-11.1). At 10 \textmu{}g/L the gain over the static plan in the worst-served third was 3.1 (0.3-6.0) and 9.9 (6.9-12.8) points with no loss in the best-served third (Table S3).
+At 50 \textmu{}g/L, in the third of locations with the fewest safe wells, the learning policy protected 32.9\% of exposed households after ten days in the census (static 16.0\%; difference 16.9, 9.4-24.3) and 40.0\% in the upazila survey (static 27.3\%; 12.7, 9.2-16.2). In the third with the most safe wells it protected fewer than the static plan (9.3 points fewer, 0.8-17.9, in the census; 5.8 fewer, 1.1-10.6, in the upazila survey) and, in the upazila survey, than door-to-door testing (7.9 fewer, 4.6-11.1). At 10 \textmu{}g/L the gain over the static plan in the worst-served third was 3.1 (0.3-6.0) and 9.9 (6.9-12.8) points with no loss in the best-served third (Table A3).
 
 \section{Discussion}
 
-Which well a team tests next strongly affects how many exposed households are protected. In two surveys of one upazila, twelve years apart, choosing each well by its expected gain in protected households per minute and updating a Gaussian-process model after every result protected 53-61\% more exposed households than door-to-door testing and 33-41\% more than a depth-based plan for the same effort, at about two-thirds of the cost per person protected of door-to-door testing. The primary comparisons survived Holm correction and replicated outside the census area and in blocks never used for design; the gain held with capacity limits, distance-dependent switching, both thresholds and different radii, and, with daily travel and absent owners, over door-to-door testing at the primary effort and over both comparators after ten days.
+In two surveys of one upazila, twelve years apart, choosing each well by its expected gain in protected households per minute and updating a Gaussian-process model after every result protected 53-61\% more exposed households than door-to-door testing and 33-41\% more than a depth-based plan for the same simulated effort, at about two-thirds of the estimated field cost per person protected. The gains survived Holm correction and permutation and rank tests. The strongest evidence is the 52-block upazila survey, analysed without re-tuning (though from the same upazila); the census estimate mixes development and confirmatory blocks, and the five confirmatory blocks confirm the direction of the gains but not, on their own, their significance against door-to-door testing. The gains held under capacity limits, distance-dependent switching, both thresholds, other radii and, against door-to-door testing, daily travel with absent owners.
 
-The gain combines feedback with prediction. Protection needs two tests: of a household's own well, to inform it, and of a nearby safe well, to give it somewhere to go. Door-to-door testing does the first everywhere but finds safe wells by chance; a static map points to likely safe wells but cannot follow up; uncertainty sampling sharpens the map but protects few households. The learning policy finds likely safe wells and then tests the unsafe wells around them. Four learners gave the same result, so the benefit lies in the decision rule rather than the algorithm. It protected more households where safe wells are scarce and, within the period studied, fewer where they are plentiful.
+The gain combines feedback with prediction. Protection needs two tests: of a household's own well, to inform it, and of a nearby safe well, to give it somewhere to go. Door-to-door testing does the first everywhere but finds safe wells by chance; a static map points to likely safe wells but cannot follow up; uncertainty sampling sharpens the map but protects few households. The learning policy finds likely safe wells and then tests the unsafe wells around them. Four learners gave the same result, so the benefit lies in the decision rule rather than the algorithm.
+
+The policy also reached first the households with the fewest safe wells nearby, about doubling their protection relative to the static plan in the census (Section 3.7), because the objective values a safe well by the unprotected households around it. The local share of safe wells is a proxy for access to safe alternatives; income, vulnerability, willingness to walk and switching were not observed, so this is not evidence of socioeconomic equity, which a field trial could assess.
 
 Earlier work studied switching after blanket testing ~\cite{Gelman2004,Jameel2021} or took blanket testing as given ~\cite{Jamil2019}, and private-well programmes have targeted testing by fixed rules ~\cite{Flanagan2020,ONeill2023}; we choose each next well from the results so far. The rule is a one-step greedy policy of the kind studied in adaptive submodular optimisation ~\cite{Golovin2011}, related to adaptive cluster sampling ~\cite{Thompson1990} and active search ~\cite{Garnett2012}, but its objective is defined by pairs of wells. Static risk maps ~\cite{Podgorski2020,Azad2026} are represented, in simplified form, by the depth-based plan, and variance-driven designs ~\cite{Chipeta2016,Kabaghe2017} by uncertainty sampling; both protected fewer households.
 
 The policy needs a list of wells with location and depth, which the 2021-2023 national campaign created for 6.3 million wells ~\cite{Khan2025}, and a smartphone that re-ranks wells after each test. Araihazar's conditions are common: in the 2000-2005 national survey, 68.5\% of wells nationally and 67.7\% in Araihazar's villages met the standard, and 55\% of 1.25 million unsafe wells were in villages where at least a fifth of wells were safe ~\cite{Jamil2019}. A conservative advice rule keeps misled households below 1\% at the cost of more false alarms. Because protection depends on behaviour ~\cite{Opar2007,Madajewicz2007,Pfaff2017}, a cluster-randomised field trial of testing order, measuring switching and urinary arsenic ~\cite{Chen2007}, is the next step.
 
-Limitations: each well is one unit of households and travel is modelled as walking; the capacity, switching and field-realism analyses relax but cannot replace field conditions. In the upazila survey, laboratory values were imputed from kit readings; the two surveys partly overlap and come from one upazila, although one spanning 226 km\textsuperscript{2} and a wide range of arsenic levels.
+Limitations: the results are simulated. They count exposed households that would learn of a nearby safe well, not observed reductions in exposure, which depend on switching and on owners sharing their wells ~\cite{Opar2007,Madajewicz2007}. Each well is one unit of households and travel is straight-line walking with a detour factor; the capacity, switching and field-realism analyses relax but cannot replace field conditions. In the upazila survey, laboratory values were imputed from kit readings, and the two surveys partly overlap and come from one upazila, although one spanning 226 km\textsuperscript{2} and a wide range of arsenic levels. Teams would also need offline maps and training to follow a ranked list, and households visited later may object; the costs exclude these items.
 
 \section{Conclusions}
 
-Choosing each next well by its expected gain in protected households, and updating a spatial model of arsenic after every result, protected 53-61\% more exposed households than door-to-door testing for the same field effort in two Bangladeshi well surveys, at about two-thirds of the cost per person protected, and reached households with the fewest safe options sooner and those with many safe options later. The rule could run on the smartphones already used in national campaigns and can help stretch testing budgets towards SDG target 6.1.
+In simulated campaigns, choosing each next well by its expected gain in protected households, and updating a spatial model of arsenic after every result, protected 53-61\% more exposed households than door-to-door testing for the same field effort in two Bangladeshi well surveys, at about two-thirds of the estimated field cost per person protected, and reached households with the fewest safe options sooner and those with many safe options later. The rule could run on the smartphones already used in national campaigns and can help stretch testing budgets towards SDG target 6.1.
 
 \vspace{6pt}
-
-\supplementary{Table S1: all comparisons (both surveys, thresholds, radii, scenarios and outcomes; primary effort and 5, 10 and 20 team-days). Table S2: comparison of learners. Table S3: protection by tertile of local safe-well share, with confidence intervals. Table S4: design and analysis history.}
 
 \authorcontributions{Conceptualization, M.M.I.; methodology, M.M.I.; software, M.M.I.; formal analysis, M.M.I.; validation, A.Y. and N.K.; writing-original draft preparation, M.M.I.; writing-review and editing, M.M.I., A.Y. and N.K.; supervision, A.Y. and N.K. All authors have read and agreed to the published version of the manuscript.}
 
@@ -245,6 +282,471 @@ SDG & Sustainable Development Goal\\
 WHO & World Health Organization\\
 \end{tabular}
 }
+
+\appendixtitles{yes}
+\appendixstart
+\appendix
+\section{Details of the Score, the Gaussian Process, the Costings and the Inference}
+
+\subsection{Score}
+
+The score $g_j$ of Equation (1) is computed for every untested well \textit{j}. $N(j)$ is the set of wells within the radius \textit{r} of \textit{j}, including \textit{j}. For each household \textit{i} (one per well), $\mathrm{inf}_i = 1$ if its well has been tested and read unsafe, $\mathrm{unt}_i = 1$ if its well is untested, and $c_i$ is the probability that a tested well within \textit{r} of \textit{i} has read safe. For the adaptive, re-planning and learning policies, $c_i = 1$ as soon as such a well exists and 0 otherwise. The static plan never looks at results: it treats a tested well \textit{k} as informing its household with probability $1 - p_k$ and sets $c_i = 1 - \prod_k (1 - p_k)$ over the tested wells \textit{k} within \textit{r} of \textit{i}. The terms of Equation (1) are $E_j = \sum_{i \in N(j)} \mathrm{inf}_i (1 - c_i)$, $S_j = c_j$, $U_j = \sum_{i \in N(j), i \neq j} \mathrm{unt}_i (1 - c_i)(1 - p_i)$ and $Q_j = 1 - \prod_{i \in N(j), i \neq j, \mathrm{unt}_i = 1} (1 - p_i)$. The expected gain is divided by the test time (20 min) plus the walking time from the team's position (straight-line distance $\times$ 1.3 at 3 km/h). Probabilities are clipped to $[10^{-9}, 1 - 10^{-9}]$ and ties are broken at random. Door-to-door testing goes to the nearest untested well. Uncertainty sampling maximises $p_j (1 - p_j)$ times the number of untested wells within \textit{r}, per minute. The oracle uses $p_j = 1$ for truly safe wells and 0 otherwise. Outcomes are evaluated per household, so a household with several safe wells nearby is counted once.
+
+\subsection{Depth Prior, Gaussian Process and Kit Readings}
+
+Depth classes are <30, 30-50, 50-70, 70-100, 100-150 and $\geq$150 ft, and unknown depth. For each class the prior mean $m$ and standard deviation $\sigma$ of $y = \log_{10} \max(\mathrm{As}, 1)$ are estimated on the fitting half. The residual $z = y - m$ is modelled as a zero-mean Gaussian process with covariance $C(h) = \sigma_s^2 \exp(-h/\rho)$ and nugget $\tau^2$, on planar coordinates in metres (local projection, not standardised). Hyperparameters are fitted by maximum likelihood (scikit-learn GaussianProcessRegressor with a constant kernel times a Mat\'{e}rn kernel with $\nu = 0.5$, plus a white-noise kernel; bounds 0.001-5, 10-5,000 m and 0.0001-2) on 1,500 shallow wells drawn at random from the fitting half, separately for each fitting half and run. Deep (>100 ft) and shallow wells form separate layers with the same hyperparameters, and an untested well is conditioned only on tested wells of its own layer (wells of unknown depth are shallow). The posterior is computed by Cholesky decomposition.
+
+Kit readings are ordered categories (0, 10, 25, 50, 100, 200, 300, 500 and about 1000 \textmu{}g/L) and enter the model as $y = \log_{10} \max(\mathrm{reading}, 1)$, so a reading of 0 gives $y = 0$. In the upazila survey the model is fitted to kit readings, so its nugget includes kit error. In the census it is fitted to laboratory values, which the simulator treats as the truth, so its nugget contains no kit error. In the sensitivity analysis of Table A7, the kit-error variance $\kappa^2 = 0.113$ (variance of $\log_{10}$ kit minus $\log_{10}$ laboratory value over the 944 pairs) is added once to the census nugget. Because $\kappa^2$ is measured against the laboratory value, which is the truth by construction, it contains no laboratory error and nothing is counted twice. The covariance of the observed readings becomes $\mathbf{K} + (\tau^2 + \kappa^2)\mathbf{I}$, and the predictive variance then refers to the kit reading the team will see. In the census, the kit reading for a well is drawn at random from the 25 of the 944 kit-laboratory pairs whose laboratory values are closest (in $\log_{10}$) to the well's laboratory value. In the upazila survey, the recorded kit reading is observed and the true laboratory value of each well is drawn for each run from the pairs with the same kit reading.
+
+\subsection{Costings}
+
+Persons protected are exposed households protected $\times$ 8 persons per well. The time-based costing charges US\$28.80 per team-day, the all-in cost of the 12 tests one tester completed per day in Araihazar in 2012-2013 (US\$2.40 per test, including labour, supervision, supplies and a placard). The time-plus-kit costing charges 12 $\times$ (US\$2.40 - US\$0.17) per team-day plus US\$0.17 for each test performed, separating kit consumables from the daily cost of the team. The per-test costing charges US\$2.40 for every test performed. Costs are pooled over blocks at the primary effort (Table A6).
+
+\subsection{Inference}
+
+For a comparison, $d_b$ is the mean over the runs of block \textit{b} of the paired difference (learning minus comparator). The \textit{t}-interval and \textit{t}-test use the $d_b$. The sign-flip permutation test compares $|\bar{d}|$ with its distribution when the signs of the $d_b$ are flipped at random (exact enumeration of all $2^{10}$ patterns in the census). The Wilcoxon signed-rank test is two-sided. Leave-one-block-out gives the mean of the $d_b$ with each block removed in turn. For the super-blocks, the 2 km grid indices of the upazila blocks are halved, giving 17 cells of 4 km $\times$ 4 km within which the $d_b$ are averaged. The Monte Carlo standard error is the standard deviation of the run-level differences within a block divided by the square root of the number of runs, averaged over blocks (Table A5, Figure A1).
+
+\section{Further Results}
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/figS1_blocks.png}
+\caption{Paired difference in exposed households protected (learning minus comparator, percentage points) after 5 team-days per 1,000 wells (50 \textmu{}g/L, 100 m) in every block. Open circles: the five confirmatory census blocks; diamonds: mean over blocks with 95\% \textit{t}-interval.}
+\label{appfig1}
+\end{figure}
+
+{\scriptsize\setlength{\tabcolsep}{3pt}\setlength{\tabcolsep}{3pt}\setlength{\LTleft}{-\extralength}\setlength{\LTright}{0pt plus 1fill}\setlength{\LTcapwidth}{\textwidth}
+\begin{longtable}{L{3.0cm}L{2.0cm}L{1.0cm}L{1.6cm}R{1.0cm}R{1.4cm}L{2.4cm}R{0.9cm}R{0.8cm}R{0.9cm}}
+\caption{All comparisons of the learning policy (Gaussian process) with other policies. Effort 'primary' is 5 team-days per 1,000 wells; the capacity and expected-switching outcomes are after ten team-days. Difference in percentage points of exposed households protected (mean over blocks, 95\% \textit{t}-interval); \textit{p}, paired \textit{t}-test over blocks (unadjusted); blocks favouring learning; relative gain in the well-weighted share.}\label{apptab1}\\
+\toprule
+\textbf{Analysis} & \textbf{Setting} & \textbf{Effort} & \textbf{Comparator} & \textbf{Learning (\%)} & \textbf{Comparator (\%)} & \textbf{Difference (95\% CI)} & \textbf{\textit{p}} & \textbf{Blocks} & \textbf{Relative gain (\%)} \\
+\midrule
+\endfirsthead
+\multicolumn{10}{l}{\textit{Table \thetable{} (continued)}}\\
+\toprule
+\textbf{Analysis} & \textbf{Setting} & \textbf{Effort} & \textbf{Comparator} & \textbf{Learning (\%)} & \textbf{Comparator (\%)} & \textbf{Difference (95\% CI)} & \textbf{\textit{p}} & \textbf{Blocks} & \textbf{Relative gain (\%)} \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+2000-01 census & 10 \textmu{}g/L, 100 m & primary & Door-to-door & 8.2 & 4.4 & 3.8 (2.0, 5.5) & <0.001 & 10/10 & +74 \\
+ & 10 \textmu{}g/L, 100 m & primary & Static plan & 8.2 & 5.9 & 2.2 (0.6, 3.8) & 0.011 & 9/10 & +37 \\
+ & 10 \textmu{}g/L, 100 m & primary & Re-planning & 8.2 & 5.7 & 2.4 (0.5, 4.3) & 0.017 & 8/10 & +36 \\
+ & 10 \textmu{}g/L, 100 m & primary & Uncertainty & 8.2 & 2.4 & 5.8 (3.7, 7.8) & <0.001 & 10/10 & +218 \\
+ & 10 \textmu{}g/L, 100 m & primary & Adaptive & 8.2 & 7.6 & 0.5 (-0.1, 1.1) & 0.081 & 8/10 & +8 \\
+ & 10 \textmu{}g/L, 100 m & primary & Oracle & 8.2 & 8.8 & -0.6 (-1.7, 0.5) & 0.237 & 4/10 & -7 \\
+ & 50 \textmu{}g/L, 100 m & primary & Door-to-door & 10.3 & 6.3 & 4.0 (1.5, 6.5) & 0.006 & 10/10 & +61 \\
+ & 50 \textmu{}g/L, 100 m & primary & Static plan & 10.3 & 7.4 & 2.8 (0.9, 4.8) & 0.008 & 9/10 & +41 \\
+ & 50 \textmu{}g/L, 100 m & primary & Re-planning & 10.3 & 7.4 & 2.9 (0.6, 5.3) & 0.019 & 10/10 & +42 \\
+ & 50 \textmu{}g/L, 100 m & primary & Uncertainty & 10.3 & 4.8 & 5.5 (3.2, 7.8) & <0.001 & 10/10 & +123 \\
+ & 50 \textmu{}g/L, 100 m & primary & Adaptive & 10.3 & 9.0 & 1.3 (0.9, 1.8) & <0.001 & 10/10 & +17 \\
+ & 50 \textmu{}g/L, 100 m & primary & Oracle & 10.3 & 12.5 & -2.2 (-3.7, -0.6) & 0.011 & 1/10 & -17 \\
+ & 10 \textmu{}g/L, 100 m & 5 days & Door-to-door & 14.2 & 7.6 & 6.7 (2.9, 10.4) & 0.003 & 10/10 & +76 \\
+ & 10 \textmu{}g/L, 100 m & 5 days & Static plan & 14.2 & 9.8 & 4.4 (1.9, 6.9) & 0.003 & 10/10 & +40 \\
+ & 10 \textmu{}g/L, 100 m & 5 days & Adaptive & 14.2 & 13.9 & 0.4 (-0.8, 1.5) & 0.499 & 6/10 & +3 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Door-to-door & 17.8 & 10.8 & 7.0 (3.2, 10.8) & 0.002 & 10/10 & +61 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Static plan & 17.8 & 12.3 & 5.5 (2.3, 8.7) & 0.004 & 10/10 & +45 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Adaptive & 17.8 & 14.6 & 3.3 (1.6, 4.9) & 0.002 & 10/10 & +22 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Door-to-door & 25.4 & 16.2 & 9.2 (5.2, 13.2) & <0.001 & 10/10 & +53 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Static plan & 25.4 & 20.0 & 5.4 (2.3, 8.5) & 0.003 & 10/10 & +26 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Adaptive & 25.4 & 24.0 & 1.4 (-0.3, 3.1) & 0.094 & 9/10 & +5 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Door-to-door & 33.6 & 22.0 & 11.5 (5.6, 17.5) & 0.002 & 10/10 & +50 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Static plan & 33.6 & 24.0 & 9.6 (4.5, 14.6) & 0.002 & 10/10 & +41 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Adaptive & 33.6 & 28.8 & 4.8 (1.9, 7.7) & 0.004 & 10/10 & +17 \\
+ & 10 \textmu{}g/L, 100 m & 20 days & Door-to-door & 40.3 & 33.3 & 7.0 (3.9, 10.2) & <0.001 & 10/10 & +24 \\
+ & 10 \textmu{}g/L, 100 m & 20 days & Static plan & 40.3 & 34.6 & 5.6 (2.0, 9.2) & 0.007 & 10/10 & +16 \\
+ & 10 \textmu{}g/L, 100 m & 20 days & Adaptive & 40.3 & 37.1 & 3.1 (1.1, 5.1) & 0.006 & 9/10 & +9 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Door-to-door & 57.0 & 44.4 & 12.7 (6.8, 18.5) & <0.001 & 10/10 & +30 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Static plan & 57.0 & 43.9 & 13.1 (7.4, 18.9) & <0.001 & 10/10 & +34 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Adaptive & 57.0 & 49.7 & 7.3 (4.8, 9.8) & <0.001 & 10/10 & +16 \\
+2012-13 upazila survey & 10 \textmu{}g/L, 100 m & primary & Door-to-door & 10.0 & 5.9 & 4.1 (2.4, 5.8) & <0.001 & 45/52 & +37 \\
+ & 10 \textmu{}g/L, 100 m & primary & Static plan & 10.0 & 7.7 & 2.3 (1.3, 3.4) & <0.001 & 43/52 & +23 \\
+ & 10 \textmu{}g/L, 100 m & primary & Re-planning & 10.0 & 6.6 & 3.3 (1.7, 5.0) & <0.001 & 38/52 & +21 \\
+ & 10 \textmu{}g/L, 100 m & primary & Uncertainty & 10.0 & 5.2 & 4.8 (3.6, 5.9) & <0.001 & 49/52 & +80 \\
+ & 10 \textmu{}g/L, 100 m & primary & Adaptive & 10.0 & 8.6 & 1.4 (0.5, 2.2) & 0.002 & 40/52 & +19 \\
+ & 10 \textmu{}g/L, 100 m & primary & Oracle & 10.0 & 13.8 & -3.8 (-5.7, -1.9) & <0.001 & 17/52 & -12 \\
+ & 50 \textmu{}g/L, 100 m & primary & Door-to-door & 15.6 & 7.2 & 8.4 (4.4, 12.4) & <0.001 & 44/52 & +53 \\
+ & 50 \textmu{}g/L, 100 m & primary & Static plan & 15.6 & 12.1 & 3.5 (1.7, 5.2) & <0.001 & 39/52 & +33 \\
+ & 50 \textmu{}g/L, 100 m & primary & Re-planning & 15.6 & 8.7 & 6.9 (3.1, 10.7) & <0.001 & 40/52 & +29 \\
+ & 50 \textmu{}g/L, 100 m & primary & Uncertainty & 15.6 & 9.9 & 5.7 (2.5, 8.9) & <0.001 & 44/52 & +49 \\
+ & 50 \textmu{}g/L, 100 m & primary & Adaptive & 15.6 & 13.4 & 2.2 (0.8, 3.6) & 0.003 & 40/52 & +20 \\
+ & 50 \textmu{}g/L, 100 m & primary & Oracle & 15.6 & 26.0 & -10.4 (-15.3, -5.5) & <0.001 & 11/52 & -18 \\
+ & 10 \textmu{}g/L, 100 m & 5 days & Door-to-door & 16.5 & 9.8 & 6.6 (3.9, 9.3) & <0.001 & 45/52 & +37 \\
+ & 10 \textmu{}g/L, 100 m & 5 days & Static plan & 16.5 & 12.1 & 4.4 (2.6, 6.2) & <0.001 & 43/52 & +26 \\
+ & 10 \textmu{}g/L, 100 m & 5 days & Adaptive & 16.5 & 13.6 & 2.8 (1.4, 4.3) & <0.001 & 42/52 & +22 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Door-to-door & 23.0 & 11.7 & 11.3 (6.4, 16.2) & <0.001 & 46/52 & +45 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Static plan & 23.0 & 18.3 & 4.7 (2.4, 6.9) & <0.001 & 44/52 & +29 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Adaptive & 23.0 & 20.1 & 2.9 (1.0, 4.8) & 0.004 & 39/52 & +16 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Door-to-door & 28.4 & 19.0 & 9.4 (6.2, 12.6) & <0.001 & 47/52 & +36 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Static plan & 28.4 & 21.9 & 6.5 (4.9, 8.2) & <0.001 & 49/52 & +32 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Adaptive & 28.4 & 23.7 & 4.7 (3.1, 6.3) & <0.001 & 45/52 & +21 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Door-to-door & 37.0 & 21.5 & 15.5 (10.0, 20.9) & <0.001 & 50/52 & +46 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Static plan & 37.0 & 28.6 & 8.3 (5.8, 10.8) & <0.001 & 47/52 & +37 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Adaptive & 37.0 & 32.0 & 4.9 (3.2, 6.7) & <0.001 & 45/52 & +17 \\
+ & 10 \textmu{}g/L, 100 m & 20 days & Door-to-door & 42.2 & 32.4 & 9.7 (7.0, 12.5) & <0.001 & 40/52 & +34 \\
+ & 10 \textmu{}g/L, 100 m & 20 days & Static plan & 42.2 & 34.0 & 8.1 (6.1, 10.2) & <0.001 & 40/52 & +34 \\
+ & 10 \textmu{}g/L, 100 m & 20 days & Adaptive & 42.2 & 37.5 & 4.6 (2.9, 6.4) & <0.001 & 38/52 & +17 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Door-to-door & 53.5 & 38.6 & 14.9 (10.7, 19.1) & <0.001 & 41/52 & +43 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Static plan & 53.5 & 42.8 & 10.7 (8.0, 13.5) & <0.001 & 40/52 & +41 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Adaptive & 53.5 & 48.5 & 5.0 (3.1, 6.9) & <0.001 & 39/52 & +13 \\
+2012-13, 38 blocks outside census area & 10 \textmu{}g/L, 100 m & primary & Door-to-door & 9.9 & 5.5 & 4.4 (2.6, 6.3) & <0.001 & 34/38 & +51 \\
+ & 10 \textmu{}g/L, 100 m & primary & Static plan & 9.9 & 7.5 & 2.5 (1.2, 3.8) & <0.001 & 33/38 & +27 \\
+ & 10 \textmu{}g/L, 100 m & primary & Re-planning & 9.9 & 6.8 & 3.2 (1.6, 4.7) & <0.001 & 27/38 & +17 \\
+ & 10 \textmu{}g/L, 100 m & primary & Uncertainty & 9.9 & 5.1 & 4.9 (3.6, 6.2) & <0.001 & 36/38 & +86 \\
+ & 10 \textmu{}g/L, 100 m & primary & Adaptive & 9.9 & 8.8 & 1.2 (0.1, 2.2) & 0.029 & 28/38 & +18 \\
+ & 10 \textmu{}g/L, 100 m & primary & Oracle & 9.9 & 14.9 & -4.9 (-7.4, -2.4) & <0.001 & 10/38 & -15 \\
+ & 50 \textmu{}g/L, 100 m & primary & Door-to-door & 15.5 & 7.2 & 8.3 (3.6, 13.0) & <0.001 & 31/38 & +50 \\
+ & 50 \textmu{}g/L, 100 m & primary & Static plan & 15.5 & 12.5 & 3.1 (0.8, 5.4) & 0.011 & 27/38 & +24 \\
+ & 50 \textmu{}g/L, 100 m & primary & Re-planning & 15.5 & 8.6 & 6.9 (2.5, 11.3) & 0.003 & 28/38 & +22 \\
+ & 50 \textmu{}g/L, 100 m & primary & Uncertainty & 15.5 & 10.1 & 5.4 (1.2, 9.6) & 0.014 & 31/38 & +38 \\
+ & 50 \textmu{}g/L, 100 m & primary & Adaptive & 15.5 & 13.3 & 2.2 (0.3, 4.1) & 0.024 & 28/38 & +22 \\
+ & 50 \textmu{}g/L, 100 m & primary & Oracle & 15.5 & 28.4 & -12.9 (-19.5, -6.3) & <0.001 & 7/38 & -21 \\
+ & 10 \textmu{}g/L, 100 m & 5 days & Door-to-door & 18.4 & 10.7 & 7.8 (4.9, 10.7) & <0.001 & 35/38 & +50 \\
+ & 10 \textmu{}g/L, 100 m & 5 days & Static plan & 18.4 & 13.0 & 5.4 (3.2, 7.7) & <0.001 & 35/38 & +32 \\
+ & 10 \textmu{}g/L, 100 m & 5 days & Adaptive & 18.4 & 15.1 & 3.3 (1.4, 5.3) & 0.001 & 30/38 & +25 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Door-to-door & 24.9 & 12.9 & 12.0 (6.4, 17.5) & <0.001 & 32/38 & +41 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Static plan & 24.9 & 19.7 & 5.1 (2.1, 8.2) & 0.002 & 31/38 & +26 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Adaptive & 24.9 & 21.8 & 3.1 (0.5, 5.6) & 0.019 & 28/38 & +17 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Door-to-door & 30.5 & 20.5 & 10.0 (7.0, 13.0) & <0.001 & 36/38 & +41 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Static plan & 30.5 & 23.6 & 6.9 (5.0, 8.8) & <0.001 & 37/38 & +33 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Adaptive & 30.5 & 25.7 & 4.8 (2.8, 6.8) & <0.001 & 33/38 & +22 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Door-to-door & 39.4 & 23.5 & 15.9 (9.5, 22.2) & <0.001 & 36/38 & +42 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Static plan & 39.4 & 31.0 & 8.4 (5.1, 11.7) & <0.001 & 34/38 & +32 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Adaptive & 39.4 & 34.6 & 4.8 (2.7, 6.8) & <0.001 & 32/38 & +17 \\
+ & 10 \textmu{}g/L, 100 m & 20 days & Door-to-door & 43.1 & 33.9 & 9.1 (6.3, 12.0) & <0.001 & 27/38 & +36 \\
+ & 10 \textmu{}g/L, 100 m & 20 days & Static plan & 43.1 & 35.9 & 7.2 (4.8, 9.6) & <0.001 & 27/38 & +30 \\
+ & 10 \textmu{}g/L, 100 m & 20 days & Adaptive & 43.1 & 38.8 & 4.3 (2.3, 6.4) & <0.001 & 26/38 & +18 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Door-to-door & 54.9 & 41.1 & 13.8 (8.8, 18.9) & <0.001 & 28/38 & +39 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Static plan & 54.9 & 45.3 & 9.6 (6.3, 13.0) & <0.001 & 27/38 & +34 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Adaptive & 54.9 & 50.4 & 4.5 (2.3, 6.8) & <0.001 & 26/38 & +12 \\
+Census, field realism & 50 \textmu{}g/L, 100 m & primary & Door-to-door & 7.9 & 5.4 & 2.5 (0.3, 4.7) & 0.032 & 7/10 & +37 \\
+ & 50 \textmu{}g/L, 100 m & primary & Static plan & 7.9 & 6.7 & 1.2 (-0.9, 3.3) & 0.240 & 7/10 & +20 \\
+ & 50 \textmu{}g/L, 100 m & primary & Re-planning & 7.9 & 6.1 & 1.8 (0.0, 3.5) & 0.046 & 8/10 & +24 \\
+ & 50 \textmu{}g/L, 100 m & primary & Uncertainty & 7.9 & 4.1 & 3.8 (2.4, 5.2) & <0.001 & 10/10 & +93 \\
+ & 50 \textmu{}g/L, 100 m & primary & Adaptive & 7.9 & 7.1 & 0.8 (0.0, 1.6) & 0.050 & 8/10 & +9 \\
+ & 50 \textmu{}g/L, 100 m & primary & Oracle & 7.9 & 10.0 & -2.1 (-3.5, -0.7) & 0.007 & 1/10 & -22 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Door-to-door & 14.1 & 9.3 & 4.8 (1.5, 8.2) & 0.010 & 8/10 & +46 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Static plan & 14.1 & 11.5 & 2.6 (-0.3, 5.5) & 0.077 & 8/10 & +24 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Adaptive & 14.1 & 12.0 & 2.1 (0.4, 3.9) & 0.021 & 9/10 & +17 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Door-to-door & 28.2 & 19.0 & 9.2 (4.2, 14.2) & 0.003 & 10/10 & +45 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Static plan & 28.2 & 21.5 & 6.6 (2.6, 10.7) & 0.005 & 10/10 & +33 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Adaptive & 28.2 & 24.5 & 3.6 (1.7, 5.6) & 0.002 & 10/10 & +17 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Door-to-door & 50.4 & 36.5 & 14.0 (6.3, 21.6) & 0.003 & 10/10 & +37 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Static plan & 50.4 & 40.9 & 9.6 (5.4, 13.7) & <0.001 & 10/10 & +27 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Adaptive & 50.4 & 44.9 & 5.6 (3.2, 8.0) & <0.001 & 10/10 & +15 \\
+Census, safe if kit $\leq$ half threshold & 10 \textmu{}g/L, 100 m & primary & Door-to-door & 7.0 & 3.5 & 3.4 (1.8, 5.1) & 0.001 & 10/10 & +80 \\
+ & 10 \textmu{}g/L, 100 m & primary & Static plan & 7.0 & 4.4 & 2.6 (0.5, 4.6) & 0.019 & 10/10 & +54 \\
+ & 10 \textmu{}g/L, 100 m & primary & Adaptive & 7.0 & 6.8 & 0.2 (-0.4, 0.8) & 0.471 & 5/10 & +3 \\
+ & 50 \textmu{}g/L, 100 m & primary & Door-to-door & 10.4 & 5.6 & 4.8 (1.8, 7.8) & 0.006 & 10/10 & +77 \\
+ & 50 \textmu{}g/L, 100 m & primary & Static plan & 10.4 & 7.0 & 3.4 (1.2, 5.5) & 0.006 & 9/10 & +56 \\
+ & 50 \textmu{}g/L, 100 m & primary & Adaptive & 10.4 & 8.6 & 1.8 (0.8, 2.8) & 0.003 & 8/10 & +22 \\
+ & 10 \textmu{}g/L, 100 m & 5 days & Door-to-door & 12.2 & 6.2 & 6.0 (2.9, 9.1) & 0.002 & 10/10 & +84 \\
+ & 10 \textmu{}g/L, 100 m & 5 days & Static plan & 12.2 & 8.2 & 4.0 (1.2, 6.8) & 0.010 & 9/10 & +45 \\
+ & 10 \textmu{}g/L, 100 m & 5 days & Adaptive & 12.2 & 12.4 & -0.3 (-1.1, 0.6) & 0.485 & 4/10 & -1 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Door-to-door & 18.0 & 9.6 & 8.4 (4.0, 12.8) & 0.002 & 10/10 & +81 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Static plan & 18.0 & 11.7 & 6.3 (3.1, 9.6) & 0.002 & 10/10 & +59 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Adaptive & 18.0 & 13.7 & 4.3 (1.2, 7.3) & 0.012 & 9/10 & +29 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Door-to-door & 21.5 & 13.1 & 8.4 (4.8, 12.0) & <0.001 & 10/10 & +63 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Static plan & 21.5 & 16.1 & 5.4 (1.6, 9.1) & 0.010 & 10/10 & +33 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Adaptive & 21.5 & 20.9 & 0.6 (-0.6, 1.9) & 0.290 & 6/10 & +3 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Door-to-door & 32.3 & 20.0 & 12.3 (6.0, 18.7) & 0.002 & 10/10 & +59 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Static plan & 32.3 & 21.8 & 10.5 (5.7, 15.3) & <0.001 & 10/10 & +53 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Adaptive & 32.3 & 27.3 & 5.0 (2.1, 7.8) & 0.003 & 10/10 & +20 \\
+ & 10 \textmu{}g/L, 100 m & 20 days & Door-to-door & 33.1 & 26.6 & 6.6 (3.4, 9.7) & 0.001 & 10/10 & +29 \\
+ & 10 \textmu{}g/L, 100 m & 20 days & Static plan & 33.1 & 28.7 & 4.5 (3.0, 6.0) & <0.001 & 10/10 & +17 \\
+ & 10 \textmu{}g/L, 100 m & 20 days & Adaptive & 33.1 & 31.5 & 1.6 (0.5, 2.8) & 0.009 & 9/10 & +7 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Door-to-door & 53.9 & 41.1 & 12.8 (7.3, 18.4) & <0.001 & 10/10 & +33 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Static plan & 53.9 & 40.1 & 13.8 (8.0, 19.7) & <0.001 & 10/10 & +41 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Adaptive & 53.9 & 48.0 & 5.9 (3.4, 8.4) & <0.001 & 10/10 & +16 \\
+Census, other radius & 50 \textmu{}g/L, 50 m & primary & Door-to-door & 8.6 & 4.1 & 4.4 (1.7, 7.2) & 0.006 & 9/10 & +101 \\
+ & 50 \textmu{}g/L, 50 m & primary & Static plan & 8.6 & 5.6 & 3.0 (1.5, 4.5) & 0.002 & 9/10 & +61 \\
+ & 50 \textmu{}g/L, 50 m & primary & Adaptive & 8.6 & 7.0 & 1.6 (0.2, 3.0) & 0.027 & 8/10 & +31 \\
+ & 50 \textmu{}g/L, 200 m & primary & Door-to-door & 10.1 & 7.2 & 2.9 (0.3, 5.4) & 0.031 & 9/10 & +31 \\
+ & 50 \textmu{}g/L, 200 m & primary & Static plan & 10.1 & 8.8 & 1.2 (-1.1, 3.5) & 0.257 & 5/10 & +14 \\
+ & 50 \textmu{}g/L, 200 m & primary & Adaptive & 10.1 & 9.0 & 1.1 (0.3, 1.9) & 0.011 & 9/10 & +12 \\
+ & 50 \textmu{}g/L, 50 m & 5 days & Door-to-door & 13.6 & 7.1 & 6.5 (2.5, 10.5) & 0.005 & 9/10 & +90 \\
+ & 50 \textmu{}g/L, 50 m & 5 days & Static plan & 13.6 & 8.9 & 4.7 (2.2, 7.2) & 0.002 & 9/10 & +58 \\
+ & 50 \textmu{}g/L, 50 m & 5 days & Adaptive & 13.6 & 10.5 & 3.0 (1.0, 5.0) & 0.009 & 9/10 & +32 \\
+ & 50 \textmu{}g/L, 200 m & 5 days & Door-to-door & 18.4 & 12.8 & 5.6 (1.7, 9.6) & 0.010 & 10/10 & +37 \\
+ & 50 \textmu{}g/L, 200 m & 5 days & Static plan & 18.4 & 15.0 & 3.4 (-0.3, 7.2) & 0.068 & 8/10 & +21 \\
+ & 50 \textmu{}g/L, 200 m & 5 days & Adaptive & 18.4 & 16.2 & 2.2 (1.1, 3.4) & 0.001 & 9/10 & +13 \\
+ & 50 \textmu{}g/L, 50 m & 10 days & Door-to-door & 24.0 & 14.8 & 9.2 (3.8, 14.6) & 0.004 & 9/10 & +62 \\
+ & 50 \textmu{}g/L, 50 m & 10 days & Static plan & 24.0 & 18.7 & 5.3 (2.5, 8.2) & 0.002 & 9/10 & +34 \\
+ & 50 \textmu{}g/L, 50 m & 10 days & Adaptive & 24.0 & 19.7 & 4.4 (2.3, 6.4) & <0.001 & 10/10 & +27 \\
+ & 50 \textmu{}g/L, 200 m & 10 days & Door-to-door & 38.4 & 25.6 & 12.8 (5.1, 20.4) & 0.004 & 10/10 & +43 \\
+ & 50 \textmu{}g/L, 200 m & 10 days & Static plan & 38.4 & 31.8 & 6.6 (2.4, 10.8) & 0.006 & 10/10 & +22 \\
+ & 50 \textmu{}g/L, 200 m & 10 days & Adaptive & 38.4 & 33.4 & 5.0 (1.8, 8.1) & 0.006 & 10/10 & +16 \\
+ & 50 \textmu{}g/L, 50 m & 20 days & Door-to-door & 38.7 & 30.1 & 8.6 (4.2, 13.0) & 0.002 & 10/10 & +31 \\
+ & 50 \textmu{}g/L, 50 m & 20 days & Static plan & 38.7 & 33.2 & 5.5 (2.6, 8.3) & 0.002 & 10/10 & +21 \\
+ & 50 \textmu{}g/L, 50 m & 20 days & Adaptive & 38.7 & 33.5 & 5.2 (1.5, 8.9) & 0.012 & 10/10 & +20 \\
+ & 50 \textmu{}g/L, 200 m & 20 days & Door-to-door & 67.4 & 52.8 & 14.7 (7.0, 22.3) & 0.002 & 10/10 & +27 \\
+ & 50 \textmu{}g/L, 200 m & 20 days & Static plan & 67.4 & 57.4 & 10.0 (4.2, 15.8) & 0.004 & 10/10 & +22 \\
+ & 50 \textmu{}g/L, 200 m & 20 days & Adaptive & 67.4 & 61.3 & 6.1 (2.5, 9.8) & 0.004 & 10/10 & +11 \\
+Census, no kit error & 10 \textmu{}g/L, 100 m & primary & Door-to-door & 9.2 & 5.0 & 4.2 (1.8, 6.5) & 0.003 & 10/10 & +66 \\
+ & 10 \textmu{}g/L, 100 m & primary & Static plan & 9.2 & 6.5 & 2.7 (0.5, 4.9) & 0.021 & 9/10 & +35 \\
+ & 10 \textmu{}g/L, 100 m & primary & Adaptive & 9.2 & 8.8 & 0.4 (-0.2, 0.9) & 0.174 & 7/10 & +4 \\
+ & 50 \textmu{}g/L, 100 m & primary & Door-to-door & 12.3 & 6.9 & 5.4 (2.2, 8.7) & 0.005 & 10/10 & +71 \\
+ & 50 \textmu{}g/L, 100 m & primary & Static plan & 12.3 & 8.6 & 3.6 (1.5, 5.7) & 0.004 & 10/10 & +48 \\
+ & 50 \textmu{}g/L, 100 m & primary & Adaptive & 12.3 & 10.6 & 1.7 (0.6, 2.8) & 0.006 & 9/10 & +18 \\
+ & 10 \textmu{}g/L, 100 m & 5 days & Door-to-door & 16.0 & 8.3 & 7.7 (3.5, 11.9) & 0.003 & 9/10 & +77 \\
+ & 10 \textmu{}g/L, 100 m & 5 days & Static plan & 16.0 & 10.7 & 5.2 (2.2, 8.3) & 0.004 & 10/10 & +41 \\
+ & 10 \textmu{}g/L, 100 m & 5 days & Adaptive & 16.0 & 15.6 & 0.4 (-0.1, 0.9) & 0.077 & 7/10 & +3 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Door-to-door & 20.9 & 12.1 & 8.8 (4.3, 13.3) & 0.002 & 10/10 & +67 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Static plan & 20.9 & 14.6 & 6.3 (3.2, 9.4) & 0.001 & 10/10 & +47 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Adaptive & 20.9 & 17.5 & 3.4 (1.8, 5.0) & <0.001 & 10/10 & +21 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Door-to-door & 28.9 & 17.8 & 11.1 (5.0, 17.3) & 0.003 & 10/10 & +55 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Static plan & 28.9 & 21.9 & 7.0 (2.9, 11.1) & 0.004 & 10/10 & +29 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Adaptive & 28.9 & 27.1 & 1.8 (-0.0, 3.7) & 0.051 & 6/10 & +6 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Door-to-door & 39.3 & 24.6 & 14.7 (7.5, 21.9) & 0.001 & 10/10 & +55 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Static plan & 39.3 & 28.7 & 10.7 (6.2, 15.1) & <0.001 & 10/10 & +40 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Adaptive & 39.3 & 34.3 & 5.0 (2.9, 7.0) & <0.001 & 10/10 & +15 \\
+ & 10 \textmu{}g/L, 100 m & 20 days & Door-to-door & 44.7 & 36.8 & 7.9 (3.8, 12.1) & 0.002 & 10/10 & +23 \\
+ & 10 \textmu{}g/L, 100 m & 20 days & Static plan & 44.7 & 39.4 & 5.3 (2.9, 7.8) & <0.001 & 10/10 & +14 \\
+ & 10 \textmu{}g/L, 100 m & 20 days & Adaptive & 44.7 & 41.4 & 3.2 (0.4, 6.1) & 0.030 & 6/10 & +8 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Door-to-door & 65.5 & 50.6 & 14.9 (8.3, 21.5) & <0.001 & 10/10 & +29 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Static plan & 65.5 & 52.2 & 13.3 (7.3, 19.3) & <0.001 & 10/10 & +29 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Adaptive & 65.5 & 58.8 & 6.7 (3.9, 9.6) & <0.001 & 10/10 & +13 \\
+Census, thinned wells & 50 \textmu{}g/L, 100 m, 25\% of wells & primary & Door-to-door & 6.9 & 4.4 & 2.5 (0.3, 4.7) & 0.030 & 7/10 & +43 \\
+ & 50 \textmu{}g/L, 100 m, 25\% of wells & primary & Static plan & 6.9 & 5.6 & 1.2 (0.3, 2.2) & 0.013 & 9/10 & +19 \\
+ & 50 \textmu{}g/L, 100 m, 25\% of wells & primary & Adaptive & 6.9 & 6.4 & 0.5 (-0.2, 1.2) & 0.145 & 7/10 & +8 \\
+ & 50 \textmu{}g/L, 100 m, 50\% of wells & primary & Door-to-door & 8.5 & 4.1 & 4.4 (1.1, 7.7) & 0.015 & 9/10 & +90 \\
+ & 50 \textmu{}g/L, 100 m, 50\% of wells & primary & Static plan & 8.5 & 6.1 & 2.5 (0.9, 4.0) & 0.005 & 7/10 & +47 \\
+ & 50 \textmu{}g/L, 100 m, 50\% of wells & primary & Adaptive & 8.5 & 7.5 & 1.1 (0.2, 1.9) & 0.019 & 8/10 & +18 \\
+ & 50 \textmu{}g/L, 100 m, 25\% of wells & 5 days & Door-to-door & 35.7 & 28.9 & 6.8 (3.9, 9.7) & <0.001 & 10/10 & +23 \\
+ & 50 \textmu{}g/L, 100 m, 25\% of wells & 5 days & Static plan & 35.7 & 32.6 & 3.1 (1.4, 4.8) & 0.003 & 9/10 & +10 \\
+ & 50 \textmu{}g/L, 100 m, 25\% of wells & 5 days & Adaptive & 35.7 & 33.3 & 2.4 (0.8, 4.0) & 0.009 & 9/10 & +7 \\
+ & 50 \textmu{}g/L, 100 m, 50\% of wells & 5 days & Door-to-door & 27.4 & 16.6 & 10.8 (2.8, 18.7) & 0.014 & 9/10 & +63 \\
+ & 50 \textmu{}g/L, 100 m, 50\% of wells & 5 days & Static plan & 27.4 & 20.4 & 6.9 (3.3, 10.5) & 0.002 & 10/10 & +38 \\
+ & 50 \textmu{}g/L, 100 m, 50\% of wells & 5 days & Adaptive & 27.4 & 24.7 & 2.7 (0.5, 4.9) & 0.021 & 8/10 & +14 \\
+ & 50 \textmu{}g/L, 100 m, 25\% of wells & 10 days & Door-to-door & 46.6 & 44.7 & 1.9 (-0.2, 4.0) & 0.070 & 4/10 & +6 \\
+ & 50 \textmu{}g/L, 100 m, 25\% of wells & 10 days & Static plan & 46.6 & 45.4 & 1.2 (-1.2, 3.6) & 0.295 & 3/10 & +4 \\
+ & 50 \textmu{}g/L, 100 m, 25\% of wells & 10 days & Adaptive & 46.6 & 45.5 & 1.1 (-0.8, 3.0) & 0.234 & 3/10 & +4 \\
+ & 50 \textmu{}g/L, 100 m, 50\% of wells & 10 days & Door-to-door & 45.5 & 35.1 & 10.4 (2.1, 18.8) & 0.020 & 10/10 & +30 \\
+ & 50 \textmu{}g/L, 100 m, 50\% of wells & 10 days & Static plan & 45.5 & 38.1 & 7.4 (3.5, 11.4) & 0.002 & 9/10 & +24 \\
+ & 50 \textmu{}g/L, 100 m, 50\% of wells & 10 days & Adaptive & 45.5 & 40.6 & 4.9 (1.7, 8.1) & 0.008 & 9/10 & +14 \\
+ & 50 \textmu{}g/L, 100 m, 25\% of wells & 20 days & Door-to-door & 49.2 & 49.2 & 0.0 (0.0, 0.0) & - & 0/10 & +0 \\
+ & 50 \textmu{}g/L, 100 m, 25\% of wells & 20 days & Static plan & 49.2 & 49.2 & 0.0 (0.0, 0.0) & - & 0/10 & +0 \\
+ & 50 \textmu{}g/L, 100 m, 25\% of wells & 20 days & Adaptive & 49.2 & 49.2 & 0.0 (0.0, 0.0) & - & 0/10 & +0 \\
+ & 50 \textmu{}g/L, 100 m, 50\% of wells & 20 days & Door-to-door & 59.5 & 56.6 & 2.9 (-0.5, 6.3) & 0.087 & 4/10 & +7 \\
+ & 50 \textmu{}g/L, 100 m, 50\% of wells & 20 days & Static plan & 59.5 & 56.9 & 2.7 (-1.0, 6.3) & 0.138 & 4/10 & +8 \\
+ & 50 \textmu{}g/L, 100 m, 50\% of wells & 20 days & Adaptive & 59.5 & 57.5 & 2.1 (-0.9, 5.0) & 0.144 & 4/10 & +6 \\
+Census, 10 min per test & 50 \textmu{}g/L, 100 m & primary & Door-to-door & 20.3 & 11.8 & 8.5 (3.3, 13.7) & 0.005 & 10/10 & +66 \\
+ & 50 \textmu{}g/L, 100 m & primary & Static plan & 20.3 & 14.8 & 5.5 (2.9, 8.0) & <0.001 & 9/10 & +43 \\
+ & 50 \textmu{}g/L, 100 m & primary & Adaptive & 20.3 & 17.6 & 2.7 (1.1, 4.3) & 0.004 & 9/10 & +17 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Door-to-door & 31.8 & 20.6 & 11.1 (4.2, 18.1) & 0.005 & 10/10 & +51 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Static plan & 31.8 & 23.7 & 8.1 (5.0, 11.2) & <0.001 & 10/10 & +39 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Adaptive & 31.8 & 28.2 & 3.6 (1.2, 5.9) & 0.007 & 9/10 & +14 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Door-to-door & 54.4 & 42.7 & 11.6 (4.9, 18.4) & 0.004 & 10/10 & +27 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Static plan & 54.4 & 45.1 & 9.3 (4.2, 14.4) & 0.003 & 9/10 & +26 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Adaptive & 54.4 & 48.8 & 5.6 (2.6, 8.6) & 0.002 & 10/10 & +13 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Door-to-door & 71.2 & 68.3 & 2.9 (-0.8, 6.6) & 0.109 & 4/10 & +7 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Static plan & 71.2 & 66.9 & 4.3 (-1.0, 9.5) & 0.099 & 4/10 & +11 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Adaptive & 71.2 & 68.8 & 2.4 (-0.9, 5.7) & 0.135 & 4/10 & +6 \\
+2012-13 with 2000-01 values (11 blocks) & 10 \textmu{}g/L, 100 m & primary & Door-to-door & 10.8 & 7.2 & 3.6 (-1.3, 8.5) & 0.130 & 8/11 & +18 \\
+ & 10 \textmu{}g/L, 100 m & primary & Static plan & 10.8 & 9.2 & 1.6 (-0.2, 3.5) & 0.074 & 9/11 & +14 \\
+ & 10 \textmu{}g/L, 100 m & primary & Adaptive & 10.8 & 9.5 & 1.3 (-0.1, 2.6) & 0.063 & 9/11 & +15 \\
+ & 50 \textmu{}g/L, 100 m & primary & Door-to-door & 17.5 & 7.1 & 10.3 (-1.0, 21.7) & 0.070 & 11/11 & +59 \\
+ & 50 \textmu{}g/L, 100 m & primary & Static plan & 17.5 & 13.9 & 3.6 (1.6, 5.6) & 0.003 & 10/11 & +37 \\
+ & 50 \textmu{}g/L, 100 m & primary & Adaptive & 17.5 & 15.1 & 2.3 (0.9, 3.7) & 0.004 & 11/11 & +16 \\
+ & 10 \textmu{}g/L, 100 m & 5 days & Door-to-door & 11.6 & 6.9 & 4.7 (-2.9, 12.4) & 0.200 & 7/11 & +18 \\
+ & 10 \textmu{}g/L, 100 m & 5 days & Static plan & 11.6 & 10.3 & 1.3 (-0.7, 3.4) & 0.178 & 7/11 & +5 \\
+ & 10 \textmu{}g/L, 100 m & 5 days & Adaptive & 11.6 & 10.9 & 0.7 (0.1, 1.4) & 0.038 & 9/11 & +9 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Door-to-door & 17.2 & 6.8 & 10.4 (-2.8, 23.6) & 0.111 & 11/11 & +54 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Static plan & 17.2 & 14.5 & 2.7 (0.5, 4.9) & 0.022 & 9/11 & +23 \\
+ & 50 \textmu{}g/L, 100 m & 5 days & Adaptive & 17.2 & 16.1 & 1.1 (0.1, 2.2) & 0.036 & 9/11 & +10 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Door-to-door & 23.0 & 13.2 & 9.8 (-2.2, 21.7) & 0.098 & 10/11 & +31 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Static plan & 23.0 & 16.7 & 6.2 (1.2, 11.3) & 0.020 & 10/11 & +30 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Adaptive & 23.0 & 18.6 & 4.4 (0.1, 8.7) & 0.044 & 9/11 & +19 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Door-to-door & 28.5 & 13.4 & 15.1 (-0.2, 30.4) & 0.052 & 11/11 & +56 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Static plan & 28.5 & 23.0 & 5.5 (2.2, 8.8) & 0.004 & 10/11 & +31 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Adaptive & 28.5 & 25.6 & 2.9 (0.0, 5.7) & 0.048 & 10/11 & +9 \\
+ & 10 \textmu{}g/L, 100 m & 20 days & Door-to-door & 40.0 & 26.5 & 13.5 (4.1, 22.9) & 0.010 & 11/11 & +34 \\
+ & 10 \textmu{}g/L, 100 m & 20 days & Static plan & 40.0 & 28.6 & 11.4 (6.1, 16.6) & <0.001 & 11/11 & +39 \\
+ & 10 \textmu{}g/L, 100 m & 20 days & Adaptive & 40.0 & 33.3 & 6.7 (1.3, 12.2) & 0.020 & 10/11 & +17 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Door-to-door & 48.1 & 27.7 & 20.4 (10.5, 30.2) & <0.001 & 11/11 & +56 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Static plan & 48.1 & 36.3 & 11.8 (8.7, 15.0) & <0.001 & 11/11 & +40 \\
+ & 50 \textmu{}g/L, 100 m & 20 days & Adaptive & 48.1 & 41.9 & 6.2 (2.3, 10.2) & 0.006 & 10/11 & +13 \\
+Census, capacity 5 households & 50 \textmu{}g/L, 100 m & 10 days & Door-to-door & 24.7 & 18.9 & 5.8 (1.7, 9.8) & 0.010 & 8/10 & +26 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Static plan & 24.7 & 19.7 & 5.0 (1.9, 8.2) & 0.006 & 10/10 & +25 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Adaptive & 24.7 & 21.5 & 3.2 (0.2, 6.2) & 0.037 & 8/10 & +12 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Door-to-door & 16.4 & 11.5 & 4.8 (1.9, 7.7) & 0.005 & 10/10 & +37 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Static plan & 16.4 & 13.3 & 3.1 (0.0, 6.2) & 0.050 & 7/10 & +19 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Adaptive & 16.4 & 15.0 & 1.4 (-0.5, 3.3) & 0.135 & 8/10 & +6 \\
+Census, expected switching & 50 \textmu{}g/L, 100 m & 10 days & Door-to-door & 19.7 & 14.1 & 5.6 (2.5, 8.7) & 0.003 & 10/10 & +38 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Static plan & 19.7 & 14.5 & 5.2 (2.5, 7.9) & 0.002 & 10/10 & +37 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Adaptive & 19.7 & 16.6 & 3.1 (1.3, 4.8) & 0.003 & 10/10 & +19 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Door-to-door & 14.7 & 9.7 & 5.0 (2.9, 7.1) & <0.001 & 10/10 & +49 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Static plan & 14.7 & 11.9 & 2.8 (1.0, 4.7) & 0.007 & 9/10 & +22 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Adaptive & 14.7 & 13.8 & 0.9 (-0.1, 1.9) & 0.064 & 9/10 & +6 \\
+2012-13, capacity 5 households & 50 \textmu{}g/L, 100 m & 10 days & Door-to-door & 30.3 & 19.5 & 10.8 (5.2, 16.3) & <0.001 & 34/52 & +12 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Static plan & 30.3 & 24.0 & 6.3 (3.8, 8.9) & <0.001 & 43/52 & +20 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Adaptive & 30.3 & 26.5 & 3.8 (2.0, 5.7) & <0.001 & 34/52 & +9 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Door-to-door & 21.7 & 16.1 & 5.6 (2.4, 8.9) & <0.001 & 30/52 & +6 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Static plan & 21.7 & 17.4 & 4.3 (2.6, 6.1) & <0.001 & 39/52 & +19 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Adaptive & 21.7 & 18.1 & 3.7 (1.9, 5.4) & <0.001 & 36/52 & +16 \\
+2012-13, expected switching & 50 \textmu{}g/L, 100 m & 10 days & Door-to-door & 23.9 & 15.6 & 8.3 (4.6, 12.0) & <0.001 & 39/52 & +22 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Static plan & 23.9 & 18.5 & 5.4 (3.6, 7.1) & <0.001 & 47/52 & +33 \\
+ & 50 \textmu{}g/L, 100 m & 10 days & Adaptive & 23.9 & 20.3 & 3.6 (2.3, 4.9) & <0.001 & 47/52 & +19 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Door-to-door & 18.1 & 13.2 & 4.9 (2.7, 7.0) & <0.001 & 41/52 & +19 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Static plan & 18.1 & 14.2 & 4.0 (2.6, 5.3) & <0.001 & 43/52 & +27 \\
+ & 10 \textmu{}g/L, 100 m & 10 days & Adaptive & 18.1 & 14.9 & 3.2 (2.0, 4.4) & <0.001 & 44/52 & +23 \\
+\end{longtable}}
+
+\begin{table}[H]
+\caption{The Gaussian-process learner compared with the other learners (2000-01 census, 100 m, kit error, primary effort; separate run with 2 random splits and 4 runs per block).}
+\label{apptab2}
+\scriptsize\setlength{\tabcolsep}{3pt}
+\begin{adjustwidth}{-\extralength}{0cm}\centering
+\begin{tabular}{L{1.6cm}L{2.4cm}R{1.6cm}R{1.6cm}L{2.4cm}R{1.0cm}R{1.0cm}}
+\toprule
+\textbf{Threshold (\textmu{}g/L)} & \textbf{Learner compared} & \textbf{Gaussian process (\%)} & \textbf{Other learner (\%)} & \textbf{Difference (95\% CI)} & \textbf{\textit{p}} & \textbf{Blocks} \\
+\midrule
+50 & Random forest & 10.5 & 10.2 & 0.3 (-0.7, 1.4) & 0.505 & 5/10 \\
+ & LightGBM & 10.5 & 10.3 & 0.2 (-0.4, 0.9) & 0.437 & 6/10 \\
+ & kNN & 10.5 & 10.2 & 0.3 (-0.1, 0.7) & 0.148 & 7/10 \\
+10 & Random forest & 8.4 & 7.9 & 0.5 (-0.5, 1.5) & 0.279 & 6/10 \\
+ & LightGBM & 8.4 & 7.8 & 0.6 (-0.3, 1.6) & 0.177 & 6/10 \\
+ & kNN & 8.4 & 8.4 & 0.0 (-0.2, 0.3) & 0.689 & 5/10 \\
+\bottomrule
+\end{tabular}
+\end{adjustwidth}
+\end{table}
+
+\begin{table}[H]
+\caption{Exposed households protected after ten team-days, by tertile (within each block) of the local share of safe wells within 200 m; learning compared with door-to-door testing and the static plan.}
+\label{apptab3}
+\scriptsize\setlength{\tabcolsep}{3pt}
+\begin{adjustwidth}{-\extralength}{0cm}\centering
+\begin{tabular}{L{2.6cm}R{1.2cm}L{1.6cm}L{1.8cm}R{1.2cm}R{1.4cm}L{2.4cm}R{1.0cm}R{1.0cm}}
+\toprule
+\textbf{Survey} & \textbf{Threshold (\textmu{}g/L)} & \textbf{Tertile} & \textbf{Comparator} & \textbf{Learning (\%)} & \textbf{Comparator (\%)} & \textbf{Difference (95\% CI)} & \textbf{\textit{p}} & \textbf{Blocks} \\
+\midrule
+2000-01 census & 50 & fewest safe & Door-to-door & 32.9 & 16.3 & 16.5 (8.4, 24.7) & 0.001 & 10/10 \\
+ & 50 & fewest safe & Static plan & 32.9 & 16.0 & 16.9 (9.4, 24.3) & <0.001 & 10/10 \\
+ & 50 & middle & Door-to-door & 33.7 & 27.5 & 6.2 (-3.2, 15.6) & 0.172 & 5/10 \\
+ & 50 & middle & Static plan & 33.7 & 30.6 & 3.1 (-4.8, 11.0) & 0.396 & 5/10 \\
+ & 50 & most safe & Door-to-door & 18.6 & 27.0 & -8.4 (-19.9, 3.1) & 0.133 & 3/10 \\
+ & 50 & most safe & Static plan & 18.6 & 28.0 & -9.3 (-17.9, -0.8) & 0.036 & 2/10 \\
+ & 10 & fewest safe & Door-to-door & 7.6 & 5.8 & 1.8 (-2.3, 5.9) & 0.342 & 6/10 \\
+ & 10 & fewest safe & Static plan & 7.6 & 4.4 & 3.1 (0.3, 6.0) & 0.034 & 7/10 \\
+ & 10 & middle & Door-to-door & 32.0 & 20.8 & 11.1 (2.1, 20.2) & 0.021 & 10/10 \\
+ & 10 & middle & Static plan & 32.0 & 22.6 & 9.4 (1.4, 17.3) & 0.026 & 8/10 \\
+ & 10 & most safe & Door-to-door & 38.2 & 25.2 & 13.0 (2.0, 24.0) & 0.026 & 8/10 \\
+ & 10 & most safe & Static plan & 38.2 & 38.1 & 0.1 (-10.5, 10.6) & 0.989 & 5/10 \\
+2012-13 upazila survey & 50 & fewest safe & Door-to-door & 40.0 & 18.3 & 21.8 (16.0, 27.5) & <0.001 & 48/52 \\
+ & 50 & fewest safe & Static plan & 40.0 & 27.3 & 12.7 (9.2, 16.2) & <0.001 & 46/52 \\
+ & 50 & middle & Door-to-door & 30.9 & 24.5 & 6.3 (1.2, 11.5) & 0.017 & 31/52 \\
+ & 50 & middle & Static plan & 30.9 & 29.2 & 1.7 (-2.2, 5.5) & 0.386 & 23/52 \\
+ & 50 & most safe & Door-to-door & 13.7 & 21.5 & -7.9 (-11.1, -4.6) & <0.001 & 5/52 \\
+ & 50 & most safe & Static plan & 13.7 & 19.5 & -5.8 (-10.6, -1.1) & 0.017 & 11/52 \\
+ & 10 & fewest safe & Door-to-door & 27.5 & 14.3 & 13.3 (8.4, 18.1) & <0.001 & 45/52 \\
+ & 10 & fewest safe & Static plan & 27.5 & 17.7 & 9.9 (6.9, 12.8) & <0.001 & 47/52 \\
+ & 10 & middle & Door-to-door & 28.3 & 23.5 & 4.8 (2.0, 7.7) & 0.001 & 33/52 \\
+ & 10 & middle & Static plan & 28.3 & 25.4 & 2.9 (-0.3, 6.1) & 0.075 & 29/52 \\
+ & 10 & most safe & Door-to-door & 21.0 & 21.0 & -0.0 (-3.6, 3.6) & 0.998 & 20/52 \\
+ & 10 & most safe & Static plan & 21.0 & 21.3 & -0.3 (-3.8, 3.1) & 0.840 & 22/52 \\
+\bottomrule
+\end{tabular}
+\end{adjustwidth}
+\end{table}
+
+\begin{table}[H]
+\caption{Design and analysis history. Earlier versions were evaluated on held-out blocks before the present design was fixed; the outcome, score and comparators changed between versions as shown. The primary endpoint of v6 was declared before its final runs. Note: the Scopus search cited in the Introduction used TITLE-ABS-KEY(arsenic AND (well$\ast$ OR tubewell$\ast$) AND (test$\ast$ OR screening OR sampling)), 1995-2026, retrieved 24 November 2026 (5,348 records, 5,212 with reference lists).}
+\label{apptab4}
+\scriptsize\setlength{\tabcolsep}{3pt}
+\begin{adjustwidth}{-\extralength}{0cm}\centering
+\begin{tabular}{L{1.6cm}L{8.0cm}L{3.8cm}L{3.6cm}}
+\toprule
+\textbf{Version} & \textbf{Design} & \textbf{Evaluated on} & \textbf{Status} \\
+\midrule
+v1 (pilot) & Outcome 'access' (household with a tested-safe well within 100 m); test counts, no travel; random forest learner & Development blocks only & Replaced: the outcome counted households whose own well was already safe \\
+v2 & Access outcome; 10 min per test, then amended (before viewing test results) to 20 min and a 10-day horizon; random-forest headline; uncertainty sampling & Five test blocks (first test-block evaluation) & Seeding error found by internal review; re-run as v3 \\
+v3 & As v2 with shared random numbers; oracle, risk-map plan, capacity and distance-decay analyses & Five test blocks (second look) & Replaced: access outcome judged inappropriate for public health \\
+v4 & Cross-fitting run of v3 started on the other half & Stopped before completion & Superseded by the v5 outcome change \\
+v5 & Protection outcome; look-ahead score (weight 0.1 for all policies); Gaussian-process headline (chosen on development blocks); uncertainty sampling and risk-map plan dropped; 10 runs, 20 days & 10 census blocks (cross-fitted); 2012-13 upazila survey (first look, kit readings as truth) & Replaced after a second internal review \\
+v6 (this paper) & Per-policy look-ahead weight; uncertainty sampling restored; repeated random splits; primary endpoint (5 team-days per 1,000 wells, Holm) declared before final runs; 2012-13 truth imputed from kit-laboratory pairs; 100 m link check; field realism, capacity and switching outcomes; non-overlap set defined as $\geq$20 wells within 100 m of a census well & 10 census blocks (5 splits); 52 upazila blocks (2 splits; second look) & Reported \\
+\bottomrule
+\end{tabular}
+\end{adjustwidth}
+\end{table}
+
+\begin{table}[H]
+\caption{Further tests of the six primary comparisons (learning against each comparator; 5 team-days per 1,000 wells, 50 \textmu{}g/L, 100 m), in percentage points. Permutation: paired sign-flip test, exact for the 10 census blocks, 200,000 random patterns otherwise; Holm adjustment over the six comparisons for each test. Super-blocks: 17 upazila cells of 4 km $\times$ 4 km, permutation \textit{p}. Confirmatory: the five census blocks never used for a design choice, exact permutation \textit{p} (smallest attainable 0.0625). MC SE: Monte Carlo standard error of a block's mean difference over its runs, against the standard deviation of the block means.}
+\label{apptab5}
+\scriptsize\setlength{\tabcolsep}{3pt}
+\begin{adjustwidth}{-\extralength}{0cm}\centering
+\begin{tabular}{L{1.8cm}L{1.6cm}R{0.8cm}R{1.1cm}L{2.4cm}L{1.5cm}L{2.4cm}L{2.4cm}L{1.4cm}}
+\toprule
+\textbf{Survey} & \textbf{Comparator} & \textbf{Blocks} & \textbf{Median difference} & \textbf{Holm \textit{p}: \textit{t}; permutation; Wilcoxon} & \textbf{Leave one block out} & \textbf{Super-blocks (95\% CI); \textit{p}} & \textbf{Confirmatory (95\% CI); \textit{p}} & \textbf{MC SE / SD between blocks} \\
+\midrule
+2000-01 census & Door-to-door & 10 & 3.3 & 0.011; 0.006; 0.006 & 3.3 to 4.4 & - & 4.5 (-0.1, 9.0); 0.0625 & 0.77 / 3.51 \\
+ & Static plan & 10 & 2.2 & 0.011; 0.008; 0.010 & 2.3 to 3.3 & - & 4.2 (1.0, 7.5); 0.0625 & 0.60 / 2.67 \\
+ & Adaptive & 10 & 1.4 & <0.001; 0.006; 0.006 & 1.2 to 1.4 & - & 1.1 (0.3, 1.9); 0.0625 & 0.41 / 0.67 \\
+2012-13 upazila survey & Door-to-door & 52 & 3.0 & <0.001; <0.001; <0.001 & 7.4 to 8.6 & 7.8 (2.0, 13.6); 0.002 & - & 1.86 / 14.38 \\
+ & Static plan & 52 & 1.9 & 0.001; <0.001; <0.001 & 2.9 to 3.7 & 3.5 (0.9, 6.1); <0.001 & - & 1.27 / 6.37 \\
+ & Adaptive & 52 & 1.0 & 0.008; <0.001; <0.001 & 1.6 to 2.4 & 2.2 (0.6, 3.9); <0.001 & - & 1.11 / 4.98 \\
+\bottomrule
+\end{tabular}
+\end{adjustwidth}
+\end{table}
+
+\begin{table}[H]
+\caption{Estimated field cost per person protected in the simulation at the primary effort (5 team-days per 1,000 wells, 50 \textmu{}g/L, 100 m; 8 persons per well; pooled over blocks), under the three costings of Appendix A. Transport to the area, training, smartphones and programme management are excluded.}
+\label{apptab6}
+\scriptsize\setlength{\tabcolsep}{3pt}
+\begin{adjustwidth}{-\extralength}{0cm}\centering
+\begin{tabular}{L{3.4cm}L{2.2cm}R{1.8cm}R{1.8cm}R{1.8cm}R{1.6cm}}
+\toprule
+\textbf{Survey} & \textbf{Policy} & \textbf{Tests per team-day} & \textbf{Time-based (US\$)} & \textbf{Time plus kit (US\$)} & \textbf{Per test (US\$)} \\
+\midrule
+2000-01 census & Door-to-door & 17.2 & 0.56 & 0.57 & 0.80 \\
+ & Static plan & 16.6 & 0.49 & 0.50 & 0.68 \\
+ & Adaptive & 16.0 & 0.41 & 0.41 & 0.54 \\
+ & Learning & 16.2 & 0.35 & 0.35 & 0.47 \\
+2012-13 upazila survey & Door-to-door & 17.4 & 0.62 & 0.65 & 0.91 \\
+ & Static plan & 16.6 & 0.55 & 0.56 & 0.75 \\
+ & Adaptive & 15.9 & 0.49 & 0.50 & 0.65 \\
+ & Learning & 15.7 & 0.41 & 0.42 & 0.53 \\
+Census, field realism & Door-to-door & 14.7 & 0.63 & 0.64 & 0.77 \\
+ & Static plan & 13.9 & 0.55 & 0.56 & 0.64 \\
+ & Adaptive & 13.4 & 0.50 & 0.50 & 0.56 \\
+ & Learning & 13.3 & 0.46 & 0.46 & 0.51 \\
+\bottomrule
+\end{tabular}
+\end{adjustwidth}
+\end{table}
+
+\begin{table}[H]
+\caption{Sensitivity of the primary comparisons (5 team-days per 1,000 wells, 100 m) to measurement assumptions of the Gaussian process: kit readings of 0 set to 5 \textmu{}g/L (half the lowest non-zero category) instead of 1 \textmu{}g/L, in both surveys; and the kit-error variance of the 944 kit-laboratory pairs (0.113 in squared $\log_{10}$ units) added to the census nugget (Appendix A). Same design as the main analysis; paired \textit{t}-test over blocks, unadjusted.}
+\label{apptab7}
+\scriptsize\setlength{\tabcolsep}{3pt}
+\begin{adjustwidth}{-\extralength}{0cm}\centering
+\begin{tabular}{L{2.0cm}L{2.4cm}R{1.2cm}L{1.6cm}R{1.4cm}R{1.2cm}R{1.3cm}L{2.2cm}R{1.0cm}R{0.9cm}}
+\toprule
+\textbf{Survey} & \textbf{Analysis} & \textbf{Threshold (\textmu{}g/L)} & \textbf{Comparator} & \textbf{Learning, main analysis (\%)} & \textbf{Learning (\%)} & \textbf{Comparator (\%)} & \textbf{Difference (95\% CI)} & \textbf{\textit{p}} & \textbf{Blocks} \\
+\midrule
+2000-01 census & kit reading 0 set to 5 \textmu{}g/L & 50 & Door-to-door & 10.3 & 10.3 & 6.3 & 4.0 (1.5, 6.6) & 0.006 & 10/10 \\
+ &  & 50 & Static plan & 10.3 & 10.3 & 7.4 & 2.9 (1.0, 4.7) & 0.007 & 9/10 \\
+ &  & 50 & Adaptive & 10.3 & 10.3 & 9.0 & 1.4 (0.8, 1.9) & <0.001 & 10/10 \\
+ &  & 10 & Door-to-door & 8.2 & 8.1 & 4.4 & 3.7 (1.9, 5.4) & <0.001 & 10/10 \\
+ &  & 10 & Static plan & 8.2 & 8.1 & 5.9 & 2.2 (0.7, 3.6) & 0.008 & 9/10 \\
+ &  & 10 & Adaptive & 8.2 & 8.1 & 7.6 & 0.4 (-0.1, 1.0) & 0.102 & 8/10 \\
+2012-13 upazila survey & kit reading 0 set to 5 \textmu{}g/L & 50 & Door-to-door & 15.6 & 15.7 & 7.2 & 8.5 (4.5, 12.4) & <0.001 & 44/52 \\
+ &  & 50 & Static plan & 15.6 & 15.7 & 12.0 & 3.7 (2.2, 5.1) & <0.001 & 41/52 \\
+ &  & 50 & Adaptive & 15.6 & 15.7 & 13.2 & 2.5 (1.3, 3.7) & <0.001 & 42/52 \\
+ &  & 10 & Door-to-door & 10.0 & 10.1 & 5.9 & 4.3 (2.7, 5.8) & <0.001 & 48/52 \\
+ &  & 10 & Static plan & 10.0 & 10.1 & 7.0 & 3.1 (1.9, 4.3) & <0.001 & 45/52 \\
+ &  & 10 & Adaptive & 10.0 & 10.1 & 8.4 & 1.8 (0.9, 2.6) & <0.001 & 42/52 \\
+2000-01 census & kit-error variance added to nugget & 50 & Door-to-door & 10.3 & 10.2 & 6.3 & 4.0 (1.4, 6.5) & 0.006 & 10/10 \\
+ &  & 50 & Static plan & 10.3 & 10.2 & 7.4 & 2.8 (0.9, 4.7) & 0.009 & 9/10 \\
+ &  & 50 & Adaptive & 10.3 & 10.2 & 9.0 & 1.3 (0.9, 1.7) & <0.001 & 10/10 \\
+ &  & 10 & Door-to-door & 8.2 & 8.2 & 4.4 & 3.8 (2.1, 5.5) & <0.001 & 10/10 \\
+ &  & 10 & Static plan & 8.2 & 8.2 & 5.9 & 2.3 (0.8, 3.8) & 0.006 & 9/10 \\
+ &  & 10 & Adaptive & 8.2 & 8.2 & 7.6 & 0.6 (-0.0, 1.2) & 0.053 & 8/10 \\
+\bottomrule
+\end{tabular}
+\end{adjustwidth}
+\end{table}
 
 \begin{adjustwidth}{-\extralength}{0cm}
 \reftitle{References}
@@ -274,7 +776,7 @@ Bain, R.; Johnston, R.; Mitis, F.; Chatterley, C.; Slaymaker, T. Establishing Su
 Fischer, A.; Hope, R.; Manandhar, A.; Hoque, S.; Foster, T.; Hakim, A.; Islam, M.S.; Bradley, D. Risky responsibilities for rural drinking water institutions: The case of unregulated self-supply in Bangladesh. \textit{Glob. Environ. Change} \textbf{2020}, \textit{65}, 102152. \url{https://doi.org/10.1016/j.gloenvcha.2020.102152}
 
 \bibitem{vanGeen2003}
-van Geen, A.; Zheng, Y.; Versteeg, R.; Stute, M.; Horneman, A.; Dhar, R.; Steckler, M.; Gelman, A.; Small, C.; Ahsan, H.; et al. Spatial variability of arsenic in 6000 tube wells in a 25 km 2 area of Bangladesh. \textit{Water Resour. Res.} \textbf{2003}, \textit{39}, 2002WR001617. \url{https://doi.org/10.1029/2002wr001617}
+van Geen, A.; Zheng, Y.; Versteeg, R.; Stute, M.; Horneman, A.; Dhar, R.; Steckler, M.; Gelman, A.; Small, C.; Ahsan, H.; et al. Spatial variability of arsenic in 6000 tube wells in a 25 km\textsuperscript{2} area of Bangladesh. \textit{Water Resour. Res.} \textbf{2003}, \textit{39}, 2002WR001617. \url{https://doi.org/10.1029/2002wr001617}
 
 \bibitem{Yu2003}
 Yu, W.H.; Harvey, C.M.; Harvey, C.F. Arsenic in groundwater in Bangladesh: A geostatistical and epidemiological framework for evaluating health effects and potential remedies. \textit{Water Resour. Res.} \textbf{2003}, \textit{39}, 2002WR001327. \url{https://doi.org/10.1029/2002wr001327}
@@ -382,7 +884,7 @@ Hino, M.; Benami, E.; Brooks, N. Machine learning for environmental monitoring. 
 Abernethy, J.; Chojnacki, A.; Farahi, A.; Schwartz, E.; Webb, J. ActiveRemediation: The Search for Lead Pipes in Flint, Michigan. Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery \& Data Mining, 2018. \url{https://doi.org/10.1145/3219819.3219896}
 
 \bibitem{Case2022}
-Case, B.K.M.; Young, J.G.; Penados, D.; Monroy, C.; Hébert-Dufresne, L.; Stevens, L. Spatial epidemiology and adaptive targeted sampling to manage the Chagas disease vector Triatoma dimidiata. \textit{PLoS Negl. Trop. Dis.} \textbf{2022}, \textit{16}, e0010436. \url{https://doi.org/10.1371/journal.pntd.0010436}
+Case, B.K.M.; Young, J.G.; Penados, D.; Monroy, C.; H\'{e}bert-Dufresne, L.; Stevens, L. Spatial epidemiology and adaptive targeted sampling to manage the Chagas disease vector Triatoma dimidiata. \textit{PLoS Negl. Trop. Dis.} \textbf{2022}, \textit{16}, e0010436. \url{https://doi.org/10.1371/journal.pntd.0010436}
 
 \bibitem{Hsiao2025}
 Hsiao, T.W.; Liao, C.Y.; Waller, L.A.; Paynabar, K. Balancing access, precision, and equity in adaptive test site allocation with an application to COVID-19 in Atlanta, Georgia. \textit{Sci. Rep.} \textbf{2025}, \textit{15}, 32775. \url{https://doi.org/10.1038/s41598-025-13804-8}

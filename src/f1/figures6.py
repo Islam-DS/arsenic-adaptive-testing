@@ -99,7 +99,7 @@ def overlap_units():
 
 
 def curves(d, fname, title, unit="block"):
-    fig, axes = plt.subplots(1, 2, figsize=(7.4, 3.4))
+    fig, axes = plt.subplots(1, 2, figsize=(7.4, 3.1))
     for ax, thr in zip(axes, (50, 10)):
         s = d[(d.thr == thr) & (d.days <= 20)]
         for arm in ("sweep:-", "static:-", "adaptive:-", HEAD, "oracle:-"):
@@ -125,19 +125,23 @@ def curves(d, fname, title, unit="block"):
 def decomposition(e_main, e_bd):
     order = ["sweep:-", "static:-", "geometry:-", "uncertainty:gp", "adaptive:-", HEAD, "oracle:-"]
     fig, axes = plt.subplots(1, 2, figsize=(7.4, 3.0))
-    for ax, (e, title) in zip(axes, ((e_main, "2000–01 census"), (e_bd, "2012–13 upazila survey"))):
-        s = unit_means(e[e.thr == 50], "protected_share").groupby("arm").protected_share.mean().reindex(order) * 100
-        ax.barh(range(len(order)), s.values, color=[ARMS[a][1] for a in order])
-        ax.set_yticks(range(len(order)), [ARMS[a][0] for a in order], fontsize=7)
-        for i, v in enumerate(s.values):
-            ax.text(v + 0.4, i, f"{v:.1f}", va="center", fontsize=7)
+    for ax, (e, title) in zip(axes, ((e_main, "2000-01 census"), (e_bd, "2012-13 upazila survey"))):
+        g = unit_means(e[e.thr == 50], "protected_share").groupby("arm").protected_share
+        s = g.mean().reindex(order) * 100
+        half = (stats.t.ppf(0.975, g.count() - 1) * g.std(ddof=1) / np.sqrt(g.count())).reindex(order) * 100
+        ax.barh(range(len(order)), s.values, color=[ARMS[a][1] for a in order],
+                xerr=half.values, error_kw=dict(lw=0.8, capsize=2, ecolor="#333333"))
+        ax.set_yticks(range(len(order)), [ARMS[a][0] for a in order], fontsize=7.5)
+        off = 0.02 * np.nanmax(s.values + half.values)
+        for i, (v, h) in enumerate(zip(s.values, half.values)):
+            ax.text(v + h + off, i, f"{v:.1f}", va="center", fontsize=7.5)
         ax.invert_yaxis(); ax.set_title(f"{title}, 50 µg/L", fontsize=8.5)
         ax.set_xlabel("Protected (%), 5 team-days/1,000 wells", fontsize=7.5)
     fig.tight_layout(); fig.savefig(FIG / "fig3_decomposition.png"); plt.close(fig)
 
 
 def harm(main, adv):
-    fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.9))
+    fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.5))
     for ax, thr in zip(axes, (50, 10)):
         for d, mk, rule in ((main, "o", "kit ≤ threshold"), (adv, "s", "kit ≤ ½ threshold")):
             s = d[(d.thr == thr) & (d.days == 10)]
@@ -148,7 +152,7 @@ def harm(main, adv):
                     ax.scatter(mis, 100 * g.protected_share.mean(), color=ARMS[arm][1], marker=mk, s=38,
                                label=f"{ARMS[arm][0]}; {rule}")
         ax.set_xlabel("Exposed households misled (%)"); ax.set_ylabel("Exposed households protected (%)")
-        ax.set_title(f"2000–01 census, {thr} µg/L, 10 days", fontsize=8.5)
+        ax.set_title(f"2000-01 census, {thr} µg/L, 10 days", fontsize=8.5)
     h, l = axes[0].get_legend_handles_labels()
     fig.legend(h, l, frameon=False, fontsize=6.3, loc="lower center", ncol=2)
     fig.tight_layout(rect=(0, 0.24, 1, 1)); fig.savefig(FIG / "fig6_harm.png"); plt.close(fig)
@@ -156,14 +160,15 @@ def harm(main, adv):
 
 def forest(rows):
     r = pd.DataFrame(rows)
-    fig, ax = plt.subplots(figsize=(7.0, 0.28 * len(r) + 1.0))
+    fig, ax = plt.subplots(figsize=(6.6, 0.21 * len(r) + 0.85))
     for i, x in enumerate(r.itertuples()):
-        ax.errorbar(x.diff, i, xerr=[[x.diff - x.lo], [x.hi - x.diff]], fmt="o", ms=3.5, capsize=2,
+        ax.errorbar(x.diff, i, xerr=[[x.diff - x.lo], [x.hi - x.diff]], fmt="o", ms=4.5, capsize=2.5,
                     color="#1d6a3a" if "sweep" in x.comparator else "#4a7fb0")
     ax.axvline(0, color="grey", lw=0.8)
-    ax.set_yticks(range(len(r)), [f"{x.setting} — vs {x.comparator}" for x in r.itertuples()], fontsize=6.5)
+    ax.set_yticks(range(len(r)), [f"{x.setting}: vs {x.comparator.replace(' depth plan', ' plan').replace(' sweep', '')}" for x in r.itertuples()], fontsize=8.5)
     ax.invert_yaxis()
-    ax.set_xlabel("Learning minus comparator (percentage points; 95% CI)", fontsize=8)
+    ax.set_xlabel("Learning minus comparator (pp; 95% t-interval)", fontsize=9.5)
+    ax.tick_params(axis="x", labelsize=9)
     fig.tight_layout(); fig.savefig(FIG / "fig5_robustness.png"); plt.close(fig)
 
 
@@ -173,7 +178,7 @@ if __name__ == "__main__":
     e_main, e_bd = effort(main), effort(bd)
     # ---- primary family
     prim = []
-    for name, e in (("2000–01 census", e_main), ("2012–13 upazila survey", e_bd)):
+    for name, e in (("2000-01 census", e_main), ("2012-13 upazila survey", e_bd)):
         for b in ("sweep:-", "static:-", "adaptive:-"):
             prim.append(dict(survey=name, comparator=ARMS[b][0], **compare(e[e.thr == 50], HEAD, b)))
     P = pd.DataFrame(prim); P["p_holm"] = holm(P.p)
@@ -181,12 +186,12 @@ if __name__ == "__main__":
     print("PRIMARY (5 team-days per 1,000 wells, 50 µg/L)\n", P.round(4).to_string())
     # ---- secondary table S1
     rows = []
-    sets = [("2000–01 census", main), ("2012–13 upazila survey", bd)]
+    sets = [("2000-01 census", main), ("2012-13 upazila survey", bd)]
     ov = overlap_units()
-    sets.append(("2012–13, blocks outside the census area", bd[~bd.unit.isin(ov)]))
+    sets.append(("2012-13, blocks outside the census area", bd[~bd.unit.isin(ov)]))
     for tag, lab in (("v6_field", "field realism (daily return, 15% absent)"), ("v6_advise", "advise if kit ≤ ½ threshold"),
                      ("v6_radius", "radius"), ("v6_nokit", "no kit error"), ("v6_thin", "thinned"),
-                     ("v6_t10", "10 min per test"), ("v6_bd2012_old", "2012–13 with 2000–01 survey")):
+                     ("v6_t10", "10 min per test"), ("v6_bd2012_old", "2012-13 with 2000-01 survey")):
         try:
             sets.append((lab, load(tag)))
         except FileNotFoundError:
@@ -207,7 +212,7 @@ if __name__ == "__main__":
                         rows.append(dict(setting=lab, thr=keys[0], radius=keys[1], thin=keys[2], horizon=f"{days} days",
                                          comparator=b, **r))
     # other outcomes (main + bd, 10 days)
-    for lab, d in (("2000–01 census", main), ("2012–13 upazila survey", bd)):
+    for lab, d in (("2000-01 census", main), ("2012-13 upazila survey", bd)):
         for metric in ("prot_cap_share", "switch_share"):
             for thr in (50, 10):
                 for b in ("sweep:-", "static:-", "adaptive:-"):
@@ -229,7 +234,7 @@ if __name__ == "__main__":
         pass
     # ---- equity
     eq = []
-    for lab, d in (("2000–01 census", main), ("2012–13 upazila survey", bd)):
+    for lab, d in (("2000-01 census", main), ("2012-13 upazila survey", bd)):
         for thr in (50, 10):
             s = d[(d.thr == thr) & (d.days == 10)]
             for t in range(3):
@@ -254,26 +259,26 @@ if __name__ == "__main__":
     except FileNotFoundError:
         adv = None
     # ---- figures
-    curves(main, "fig2_protected.png", "2000–01 census, ")
-    curves(bd, "fig4_upazila.png", "2012–13 upazila survey, ")
+    curves(main, "fig2_protected.png", "2000-01 census, ")
+    curves(bd, "fig4_upazila.png", "2012-13 upazila survey, ")
     decomposition(e_main, e_bd)
     if adv is not None:
         harm(main, adv)
     fr = []
-    for lab in ["2000–01 census", "2012–13 upazila survey", "2012–13, blocks outside the census area",
+    for lab in ["2000-01 census", "2012-13 upazila survey", "2012-13, blocks outside the census area",
                 "field realism (daily return, 15% absent)", "advise if kit ≤ ½ threshold", "no kit error",
-                "10 min per test", "2012–13 with 2000–01 survey"]:
+                "10 min per test", "2012-13 with 2000-01 survey"]:
         for b in ("sweep:-", "static:-"):
             x = S1[(S1.setting == lab) & (S1.thr == 50) & (S1.radius == 100) & (S1.thin == 1) &
                    (S1.horizon == "5 d/1000 wells") & (S1.comparator == b)]
             if len(x):
                 fr.append(dict(setting=lab, comparator=ARMS[b][0].lower(), **x.iloc[0][["diff", "lo", "hi"]].to_dict()))
-    for lab in ("2000–01 census; outcome prot_cap_share", "2000–01 census; outcome switch_share"):
+    for lab in ("2000-01 census; outcome prot_cap_share", "2000-01 census; outcome switch_share"):
         for b in ("sweep:-", "static:-"):
             x = S1[(S1.setting == lab) & (S1.thr == 50) & (S1.comparator == b)]
             if len(x):
-                fr.append(dict(setting=lab.replace("2000–01 census; outcome prot_cap_share", "capacity 5 households (10 days)")
-                               .replace("2000–01 census; outcome switch_share", "distance-decay switching (10 days)"),
+                fr.append(dict(setting=lab.replace("2000-01 census; outcome prot_cap_share", "capacity 5 households (10 days)")
+                               .replace("2000-01 census; outcome switch_share", "distance-decay switching (10 days)"),
                                comparator=ARMS[b][0].lower(), **x.iloc[0][["diff", "lo", "hi"]].to_dict()))
     forest(fr)
     print("done")

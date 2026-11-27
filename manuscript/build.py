@@ -1,11 +1,10 @@
 """Build manuscript.docx and manuscript.pdf (MDPI numbered citations) from manuscript.md + references.bib,
-and supplementary.docx from the result tables.
+with Appendices A-B from appendix.md (written by make_appendix.py).
 
     python -X utf8 manuscript/build.py
 """
 import html, pathlib, re, subprocess, tempfile
 import markdown
-import pandas as pd
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Pt, Cm
@@ -97,6 +96,8 @@ def number_citations(md, bib):
 def number_figures(md):
     n = [0]
     def repl(m):
+        if m.group(1).startswith("**Figure"):       # appendix figures carry their own label (Figure A1)
+            return m.group(0)
         n[0] += 1
         return f"![**Figure {n[0]}.** {m.group(1)}]({m.group(2)})"
     return re.sub(r"!\[(.*?)\]\((.*?)\)", repl, md)
@@ -130,7 +131,12 @@ AUTHOR_BLOCK = ["1 Al-Farabi Kazakh National University, Almaty, Kazakhstan; isl
 
 
 def latex_to_text(s):
-    s = s.replace("\\lambda", "λ").replace("\\,", " ").replace("\\text", "").replace("{", "").replace("}", "")
+    for a, b in (("\\lambda", "λ"), ("\\kappa", "κ"), ("\\bar", ""), ("\\sigma", "σ"), ("\\tau", "τ"), ("\\rho", "ρ"), ("\\mu", "μ"), ("\\Phi", "Φ"),
+                 ("\\sum", "Σ"), ("\\prod", "Π"), ("\\neq", " ≠ "), ("\\in", " ∈ "), ("\\sqrt", "√"), ("\\exp", "exp"),
+                 ("\\log", "log"), ("\\max", "max"), ("^{\\top}", "ᵀ"), ("\\top", "ᵀ"), ("\\mathbf", ""),
+                 ("\\mathrm", ""), ("\\,", " "), ("\\text", "")):
+        s = s.replace(a, b)
+    s = s.replace("{", "").replace("}", "")
     s = re.sub(r"\\frac(\S+)", r"\1", s)
     return s.replace("_", "").replace("\\", "")
 
@@ -185,7 +191,9 @@ def write_docx(md, refs, path, title, author):
             continue
         elif ln.startswith("$$"):
             p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            r = p.add_run("sⱼ = [ pⱼ (Eⱼ + λUⱼ) + (1 - pⱼ)(Sⱼ + λQⱼ) ] / ( t_test + t_walk(j) )"); r.italic = True
+            r = p.add_run("gⱼ = [ pⱼ (Eⱼ + λUⱼ) + (1 - pⱼ)(Sⱼ + λQⱼ) ] / ( t_test + t_walk(j) )"); r.italic = True
+        elif ln.startswith("<!--"):
+            pass
         elif ln.startswith("- "):
             add_runs(doc.add_paragraph(style="List Bullet"), ln[2:])
         elif ln.strip():
@@ -205,7 +213,7 @@ th,td{border-top:0.6pt solid #888;border-bottom:0.6pt solid #888;padding:2pt 5pt
 
 
 def write_pdf(md, refs, title, author, pdf):
-    body = re.sub(r"\$\$.*?\$\$", lambda m: "<p style='text-align:center'><i>s<sub>j</sub></i> = [ <i>p<sub>j</sub></i> (<i>E<sub>j</sub></i> + λ<i>U<sub>j</sub></i>) + (1 - <i>p<sub>j</sub></i>)(<i>S<sub>j</sub></i> + λ<i>Q<sub>j</sub></i>) ] / ( <i>t</i><sub>test</sub> + <i>t</i><sub>walk</sub>(<i>j</i>) ),</p>", md, flags=re.S)
+    body = re.sub(r"\$\$.*?\$\$", lambda m: "<p style='text-align:center'><i>g<sub>j</sub></i> = [ <i>p<sub>j</sub></i> (<i>E<sub>j</sub></i> + λ<i>U<sub>j</sub></i>) + (1 - <i>p<sub>j</sub></i>)(<i>S<sub>j</sub></i> + λ<i>Q<sub>j</sub></i>) ] / ( <i>t</i><sub>test</sub> + <i>t</i><sub>walk</sub>(<i>j</i>) ),</p>", md, flags=re.S)
     body = re.sub(r"\$([^$]+)\$", lambda m: "<i>" + latex_to_text(m.group(1)) + "</i>", body)
     body = body.replace(DOLLAR, "$")
     h = markdown.markdown(body, extensions=["tables"])
@@ -227,68 +235,17 @@ def write_pdf(md, refs, title, author, pdf):
     d.save(str(pdf) + ".tmp"); d.close(); pathlib.Path(str(pdf) + ".tmp").replace(pdf)
 
 
-# ------------------------------------------------------------------ supplementary
-HISTORY = [
-    ("v1 (pilot)", "Outcome 'access' (household with a tested-safe well within 100 m); test counts, no travel; random forest learner", "Development blocks only", "Replaced: the outcome counted households whose own well was already safe"),
-    ("v2", "Access outcome; 10 min per test, then amended (before viewing test results) to 20 min and a 10-day horizon; random-forest headline; uncertainty sampling", "Five test blocks (first test-block evaluation)", "Seeding error found by internal review; re-run as v3"),
-    ("v3", "As v2 with shared random numbers; oracle, risk-map plan (risk-map plan), capacity and distance-decay analyses", "Five test blocks (second look)", "Replaced: access outcome judged inappropriate for public health"),
-    ("v4", "Cross-fitting run of v3 started on the other half", "Stopped before completion", "Superseded by the v5 outcome change"),
-    ("v5", "Protection outcome; look-ahead score (look-ahead weight 0.1 for all policies); Gaussian-process headline (chosen on development blocks); uncertainty sampling and risk-map plan dropped; 10 runs, 20 days", "10 census blocks (cross-fitted); 2012-13 upazila survey (first look, kit readings as truth)", "Replaced after a second internal review"),
-    ("v6 (this paper)", "Per-policy look-ahead weight; uncertainty sampling restored; repeated random splits; primary endpoint (5 team-days per 1,000 wells, Holm) declared before final runs; 2012-13 truth imputed from kit-lab pairs; 100 m link check; field realism, capacity and switching outcomes; non-overlap set defined as >= 20 wells within 100 m of a census well", "10 census blocks (5 splits); 52 upazila blocks (2 splits; second look)", "Reported"),
-]
-
-
-def _table(doc, title, df):
-    doc.add_paragraph(title)
-    tab = doc.add_table(rows=len(df) + 1, cols=len(df.columns)); tab.style = "Light List"
-    for j, c in enumerate(df.columns):
-        tab.cell(0, j).text = str(c)
-    for i, row in enumerate(df.itertuples(index=False), 1):
-        for j, v in enumerate(row):
-            tab.cell(i, j).text = str(v)
-
-
-def supplementary():
-    ren = {"setting": "Analysis", "survey": "Survey", "thr": "Threshold (µg/L)", "radius": "Radius (m)", "thin": "Density",
-           "horizon": "Effort", "comparator": "Comparator", "tertile": "Tertile", "a_pct": "Learning (%)",
-           "b_pct": "Comparator (%)", "diff": "Diff. (pp)", "lo": "95% CI low", "hi": "95% CI high", "p": "p (t-test)",
-           "units_positive": "Blocks positive", "pooled_a": "Learning pooled (%)", "pooled_b": "Comparator pooled (%)",
-           "rel_pooled": "Relative gain pooled (%)"}
-    S1 = pd.read_csv(ROOT / "results" / "f1_v6_table_S1.csv").rename(columns=ren).round(3)
-    S1["Analysis"] = (S1["Analysis"].str.replace("; outcome prot_cap_share", "; outcome: protected with capacity of 5 households", regex=False)
-                      .str.replace("; outcome switch_share", "; outcome: expected switching (distance decay)", regex=False))
-    S2 = pd.read_csv(ROOT / "results" / "f1_v6_table_S2.csv").rename(columns=ren).round(3)
-    S3 = pd.read_csv(ROOT / "results" / "f1_v6_table_S3.csv").rename(columns=ren).round(3)
-    S4 = pd.DataFrame(HISTORY, columns=["Version", "Design", "Evaluated on", "Status"])
-    doc = Document()
-    doc.styles["Normal"].font.size = Pt(7.5)
-    doc.add_heading("Supplementary Materials", 0)
-    _table(doc, "Table S1. All comparisons of the learning policy (Gaussian process) with other policies, by survey and "
-                "analysis. Effort '5 d/1000 wells' is the primary endpoint; differences in percentage points of exposed "
-                "households protected; 95% t-interval and paired t-test over blocks (unadjusted); pooled = well-weighted "
-                "share over the whole area. The capacity and expected-switching outcomes are after ten team-days.", S1)
-    _table(doc, "Table S2. The Gaussian-process learner compared with the other learners (2000-01 census, 100 m, kit error, "
-                "primary effort; separate run with 2 random splits and 4 runs per block).", S2)
-    _table(doc, "Table S3. Exposed households protected after ten team-days, by tertile (within each block) of the local "
-                "share of safe wells within 200 m; learning compared with door-to-door testing and the static plan.", S3)
-    _table(doc, "Table S4. Design and analysis history. Earlier versions were evaluated on held-out blocks before the "
-                "present design was fixed; the outcome, score and comparators changed between versions as shown. The "
-                "primary endpoint of v6 was declared before its final runs. Note: the Scopus search cited in the Introduction used "
-                "TITLE-ABS-KEY(arsenic AND (well* OR tubewell*) AND (test* OR screening OR sampling)), 1995-2026, retrieved "
-                "24 November 2026 (5,348 records, 5,212 with reference lists).", S4)
-    _props(doc, "Supplementary Materials")
-    doc.save(M / "supplementary.docx")
-
-
 if __name__ == "__main__":
     src = (M / "manuscript.md").read_text(encoding="utf-8")
     fm = re.match(r"---\n(.*?)\n---\n", src, re.S)
     meta = dict(re.findall(r'(\w+): "?(.*?)"?$', fm.group(1), re.M))
     md = src[fm.end():]
+    app = M / "appendix.md"
+    if app.exists():                                  # Appendices A-B go after the back matter, before the references
+        md = md.replace("\n# References", "\n" + app.read_text(encoding="utf-8") + "\n\n# References")
     bib = parse_bib((M / "references.bib").read_text(encoding="utf-8"))
     md = number_figures(md).replace("US$", "US" + DOLLAR)   # keep currency out of the $math$ regex
     md, refs = number_citations(md, bib)
     write_docx(md, refs, M / "manuscript.docx", meta["title"], meta["author"])
     write_pdf(md, refs, meta["title"], meta["author"], M / "manuscript.pdf")
-    supplementary()
-    print(len(refs), "references; built manuscript.docx, manuscript.pdf, supplementary.docx")
+    print(len(refs), "references; built manuscript.docx and manuscript.pdf (appendices included)")

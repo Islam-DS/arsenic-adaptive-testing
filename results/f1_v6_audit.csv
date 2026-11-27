@@ -1,0 +1,117 @@
+check,reported,recomputed,tolerance,status
+Table 2 census vs sweep|-: comparator %,6.3,6.272,0.05,OK
+Table 2 census vs sweep|-: learning %,10.3,10.2889,0.05,OK
+Table 2 census vs sweep|-: difference,4.0,4.0169,0.05,OK
+Table 2 census vs sweep|-: CI low,1.5,1.5029,0.05,OK
+Table 2 census vs sweep|-: CI high,6.5,6.5309,0.05,OK
+Table 2 census vs sweep|-: blocks positive,10,10.0,0.0,OK
+Table 2 census vs sweep|-: relative gain %,61,61.179,0.5,OK
+Table 2 census vs static|-: comparator %,7.4,7.4402,0.05,OK
+Table 2 census vs static|-: learning %,10.3,10.2889,0.05,OK
+Table 2 census vs static|-: difference,2.8,2.8487,0.05,OK
+Table 2 census vs static|-: CI low,0.9,0.9409,0.05,OK
+Table 2 census vs static|-: CI high,4.8,4.7564,0.05,OK
+Table 2 census vs static|-: blocks positive,9,9.0,0.0,OK
+Table 2 census vs static|-: relative gain %,41,41.2375,0.5,OK
+Table 2 census vs adaptive|-: comparator %,9.0,8.9572,0.05,OK
+Table 2 census vs adaptive|-: learning %,10.3,10.2889,0.05,OK
+Table 2 census vs adaptive|-: difference,1.3,1.3316,0.05,OK
+Table 2 census vs adaptive|-: CI low,0.9,0.8556,0.05,OK
+Table 2 census vs adaptive|-: CI high,1.8,1.8077,0.05,OK
+Table 2 census vs adaptive|-: blocks positive,10,10.0,0.0,OK
+Table 2 census vs adaptive|-: relative gain %,17,17.3045,0.5,OK
+"Table 2 census, 5 confirmatory vs sweep|-: comparator %",5.9,5.8537,0.05,OK
+"Table 2 census, 5 confirmatory vs sweep|-: learning %",10.3,10.3245,0.05,OK
+"Table 2 census, 5 confirmatory vs sweep|-: difference",4.5,4.4708,0.05,OK
+"Table 2 census, 5 confirmatory vs sweep|-: CI low",-0.1,-0.06,0.05,OK
+"Table 2 census, 5 confirmatory vs sweep|-: CI high",9.0,9.0015,0.05,OK
+"Table 2 census, 5 confirmatory vs sweep|-: blocks positive",5,5.0,0.0,OK
+"Table 2 census, 5 confirmatory vs sweep|-: relative gain %",71,70.7398,0.5,OK
+"Table 2 census, 5 confirmatory vs sweep|-: unadjusted p",0.052,0.0519,0.0005,OK
+"Table 2 census, 5 confirmatory vs static|-: comparator %",6.1,6.0879,0.05,OK
+"Table 2 census, 5 confirmatory vs static|-: learning %",10.3,10.3245,0.05,OK
+"Table 2 census, 5 confirmatory vs static|-: difference",4.2,4.2366,0.05,OK
+"Table 2 census, 5 confirmatory vs static|-: CI low",1.0,0.9684,0.05,OK
+"Table 2 census, 5 confirmatory vs static|-: CI high",7.5,7.5049,0.05,OK
+"Table 2 census, 5 confirmatory vs static|-: blocks positive",5,5.0,0.0,OK
+"Table 2 census, 5 confirmatory vs static|-: relative gain %",71,70.7645,0.5,OK
+"Table 2 census, 5 confirmatory vs static|-: unadjusted p",0.023,0.0228,0.0005,OK
+"Table 2 census, 5 confirmatory vs adaptive|-: comparator %",9.2,9.2172,0.05,OK
+"Table 2 census, 5 confirmatory vs adaptive|-: learning %",10.3,10.3245,0.05,OK
+"Table 2 census, 5 confirmatory vs adaptive|-: difference",1.1,1.1073,0.05,OK
+"Table 2 census, 5 confirmatory vs adaptive|-: CI low",0.3,0.2759,0.05,OK
+"Table 2 census, 5 confirmatory vs adaptive|-: CI high",1.9,1.9387,0.05,OK
+"Table 2 census, 5 confirmatory vs adaptive|-: blocks positive",5,5.0,0.0,OK
+"Table 2 census, 5 confirmatory vs adaptive|-: relative gain %",14,13.7253,0.5,OK
+"Table 2 census, 5 confirmatory vs adaptive|-: unadjusted p",0.021,0.0209,0.0005,OK
+Table 2 upazila vs sweep|-: comparator %,7.2,7.189,0.05,OK
+Table 2 upazila vs sweep|-: learning %,15.6,15.568,0.05,OK
+Table 2 upazila vs sweep|-: difference,8.4,8.379,0.05,OK
+Table 2 upazila vs sweep|-: CI low,4.4,4.3753,0.05,OK
+Table 2 upazila vs sweep|-: CI high,12.4,12.3827,0.05,OK
+Table 2 upazila vs sweep|-: blocks positive,44,44.0,0.0,OK
+Table 2 upazila vs sweep|-: relative gain %,53,52.9663,0.5,OK
+Table 2 upazila vs static|-: comparator %,12.1,12.0975,0.05,OK
+Table 2 upazila vs static|-: learning %,15.6,15.568,0.05,OK
+Table 2 upazila vs static|-: difference,3.5,3.4705,0.05,OK
+Table 2 upazila vs static|-: CI low,1.7,1.6964,0.05,OK
+Table 2 upazila vs static|-: CI high,5.2,5.2445,0.05,OK
+Table 2 upazila vs static|-: blocks positive,39,39.0,0.0,OK
+Table 2 upazila vs static|-: relative gain %,33,33.4899,0.5,OK
+Table 2 upazila vs adaptive|-: comparator %,13.4,13.3896,0.05,OK
+Table 2 upazila vs adaptive|-: learning %,15.6,15.568,0.05,OK
+Table 2 upazila vs adaptive|-: difference,2.2,2.1784,0.05,OK
+Table 2 upazila vs adaptive|-: CI low,0.8,0.792,0.05,OK
+Table 2 upazila vs adaptive|-: CI high,3.6,3.5648,0.05,OK
+Table 2 upazila vs adaptive|-: blocks positive,40,40.0,0.0,OK
+Table 2 upazila vs adaptive|-: relative gain %,20,20.2981,0.5,OK
+Table 2 census vs sweep|-: Holm p,0.011,0.0112,0.0005,OK
+Table 2 census vs static|-: Holm p,0.011,0.0112,0.0005,OK
+Table 2 census vs adaptive|-: Holm p,0.001,0.0007,0.0005,OK
+Table 2 upazila vs sweep|-: Holm p,0.001,0.0006,0.0005,OK
+Table 2 upazila vs static|-: Holm p,0.001,0.001,0.0005,OK
+Table 2 upazila vs adaptive|-: Holm p,0.008,0.0081,0.0005,OK
+Results/abstract: max Holm p <= 0.011,0.011,0.0112,0.0005,OK
+"Table S5 row 1: Holm p, permutation",0.005859375,0.0059,0.002,OK
+"Table S5 row 1: Holm p, Wilcoxon",0.005859375,0.0059,0.0005,OK
+"Table S5 row 2: Holm p, permutation",0.0078125,0.0078,0.002,OK
+"Table S5 row 2: Holm p, Wilcoxon",0.009765625,0.0098,0.0005,OK
+"Table S5 row 3: Holm p, permutation",0.005859375,0.0059,0.002,OK
+"Table S5 row 3: Holm p, Wilcoxon",0.005859375,0.0059,0.0005,OK
+"Table S5 row 4: Holm p, permutation",0.0,0.0001,0.002,OK
+"Table S5 row 4: Holm p, Wilcoxon",1.409602885451732e-06,0.0,0.0005,OK
+"Table S5 row 5: Holm p, permutation",0.000125,0.0001,0.002,OK
+"Table S5 row 5: Holm p, Wilcoxon",8.519287867169472e-05,0.0001,0.0005,OK
+"Table S5 row 6: Holm p, permutation",0.00054,0.0006,0.002,OK
+"Table S5 row 6: Holm p, Wilcoxon",8.519287867169472e-05,0.0001,0.0005,OK
+Results: permutation and Wilcoxon Holm p <= 0.010,0.01,0.0098,0.0005,OK
+Abstract: +61% vs door-to-door (census),61,61.179,0.5,OK
+Abstract: +53% vs door-to-door (upazila),53,52.9663,0.5,OK
+"Abstract: 33% (lower end, vs static)",33,33.4899,0.5,OK
+"Abstract: 41% (upper end, vs static)",41,41.2375,0.5,OK
+Cost census learning|gp time,0.35,0.3456,0.005,OK
+Cost census sweep|- time,0.56,0.557,0.005,OK
+Cost upazila learning|gp time,0.41,0.4085,0.005,OK
+Cost upazila sweep|- time,0.62,0.625,0.005,OK
+Cost census adaptive|- time,0.41,0.4054,0.005,OK
+Cost census static|- time,0.49,0.4881,0.005,OK
+Cost upazila adaptive|- time,0.49,0.4915,0.005,OK
+Cost upazila static|- time,0.55,0.5452,0.005,OK
+Cost census learning|gp per_test,0.47,0.4651,0.005,OK
+Cost census sweep|- per_test,0.8,0.7998,0.005,OK
+Cost census learning|gp tpd,16.2,16.1506,0.05,OK
+Cost census sweep|- tpd,17.2,17.2313,0.05,OK
+"Table S6 census learning, time plus kit",0.35,0.354,0.005,OK
+Methods/Table S7: kit-error variance of the 944 pairs,0.113,0.1129,0.0005,OK
+Table S7 v6_zero5 vs sweep|-: significant at 50 ug/L (1 = p < 0.05),1,1.0,0.0,OK
+Table S7 v6_zero5 vs static|-: significant at 50 ug/L (1 = p < 0.05),1,1.0,0.0,OK
+Table S7 v6_zero5 vs adaptive|-: significant at 50 ug/L (1 = p < 0.05),1,1.0,0.0,OK
+Table S7 v6_bd2012_zero5 vs sweep|-: significant at 50 ug/L (1 = p < 0.05),1,1.0,0.0,OK
+Table S7 v6_bd2012_zero5 vs static|-: significant at 50 ug/L (1 = p < 0.05),1,1.0,0.0,OK
+Table S7 v6_bd2012_zero5 vs adaptive|-: significant at 50 ug/L (1 = p < 0.05),1,1.0,0.0,OK
+Table S7 v6_kitnug vs sweep|-: significant at 50 ug/L (1 = p < 0.05),1,1.0,0.0,OK
+Table S7 v6_kitnug vs static|-: significant at 50 ug/L (1 = p < 0.05),1,1.0,0.0,OK
+Table S7 v6_kitnug vs adaptive|-: significant at 50 ug/L (1 = p < 0.05),1,1.0,0.0,OK
+Results: learning protection changes by at most 0.1 points,0.1,0.1026,0.05,OK
+Results: gains change by at most 0.3 points,0.3,0.3176,0.05,OK
+Wording: 'independent' used for validation,0,,,OK
