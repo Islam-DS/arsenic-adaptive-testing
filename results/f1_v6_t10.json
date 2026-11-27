@@ -1,0 +1,45 @@
+{
+ "tag": "v6_t10",
+ "dev": false,
+ "area": "araihazar",
+ "splits": 2,
+ "seeds": 4,
+ "radius": [
+  100
+ ],
+ "thr": [
+  50.0
+ ],
+ "kit": "on",
+ "impute": false,
+ "days": 20.0,
+ "lams": [
+  "static=0.05",
+  "geometry=0.1",
+  "adaptive=0.1",
+  "learning=0.1",
+  "oracle=0.1",
+  "sweep=0",
+  "uncertainty=0"
+ ],
+ "policies": [
+  "sweep",
+  "static",
+  "adaptive",
+  "learning"
+ ],
+ "learners": [
+  "gp"
+ ],
+ "test_min": 10.0,
+ "advise": 1.0,
+ "known": 0.0,
+ "min_known": 0,
+ "cap": 5,
+ "daily_return": false,
+ "absent": 0.0,
+ "jobs": 14,
+ "thin": [
+  1.0
+ ]
+}

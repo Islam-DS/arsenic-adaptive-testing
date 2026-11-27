@@ -1,0 +1,49 @@
+{
+ "tag": "v6_bd2012",
+ "dev": false,
+ "area": "bd2012",
+ "splits": 2,
+ "seeds": 3,
+ "radius": [
+  100
+ ],
+ "thr": [
+  50.0,
+  10.0
+ ],
+ "kit": "on",
+ "impute": true,
+ "days": 20.0,
+ "lams": [
+  "static=0.05",
+  "geometry=0.1",
+  "adaptive=0.1",
+  "learning=0.1",
+  "oracle=0.1",
+  "sweep=0",
+  "uncertainty=0"
+ ],
+ "policies": [
+  "sweep",
+  "static",
+  "geometry",
+  "adaptive",
+  "uncertainty",
+  "learning",
+  "oracle"
+ ],
+ "learners": [
+  "gp"
+ ],
+ "test_min": 20,
+ "advise": 1.0,
+ "known": 0.0,
+ "min_known": 0,
+ "cap": 5,
+ "daily_return": false,
+ "absent": 0.0,
+ "jobs": 14,
+ "thin": [
+  1.0
+ ]
+}
