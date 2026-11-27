@@ -15,7 +15,7 @@ authors:
     affiliation: Riga Technical University
     orcid: "https://orcid.org/0000-0002-0980-0958"
 license: MIT
-doi: 10.5281/zenodo.24566075
+doi: 10.5281/zenodo.24578227
 repository-code: "https://github.com/Islam-DS/arsenic-adaptive-testing"
 date-released: 2026-11-24
 keywords: [arsenic, groundwater, tube wells, adaptive sampling, active learning, Gaussian process, Bangladesh, SDG 6.1]
