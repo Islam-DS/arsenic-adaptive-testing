@@ -73,3 +73,14 @@ The design history is summarised in Table A4 of the article. This file records t
 - audit.py rewritten: every cell of Table 2 and Tables A1-A8, A10 plus abstract and selected text numbers; rounding-only
   tolerance; exits with status 1 on any mismatch (3,495 checks OK, 2 skipped). Tests: tests/test_sim4.py, test_inference_audit.py.
 - Pinned environment (requirements.txt), src/verify_data.py, CI workflow, CC BY licence file, S->A table naming.
+
+## Final verification (2026-11-28, sixth review)
+- audit.py also recomputes Table A9 from the saved per-well calibration predictions (results/f1_v6_calibration_predictions.csv.gz)
+  and the Table A8 share of safe wells from the saved bootstrap draws (results/f1_v6_boot_truth.csv); 3,655 checks, none skipped
+  with the data present. The audit found one wrong number in the text (under-prediction 0.15 -> 0.22), now corrected.
+- Tests: GP probabilities equal scikit-learn's GaussianProcessRegressor with the same fixed kernel; counts at 360/720/1,080 min
+  with and without daily return; hand-computed walk-home case (50 vs 52 wells). 29 tests.
+- Scopus check: results/scopus_citation_check.csv (EID, DOI, year, match flags by title and by author names; 0 citations;
+  one author-name match is a different Chipeta, a 2005 Malawi water-sector report).
+- 2012-13 workbook provenance stated in Methods and data/README.md.
+- manuscript/check_submission.py: submission PDF, zip source and figures match the current audited sources.

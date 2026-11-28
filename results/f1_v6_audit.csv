@@ -3407,8 +3407,6 @@ Table A7 2012-13 upazila survey | 600 m exclusion buffer around evaluated wells 
 Table A7 2012-13 upazila survey | 600 m exclusion buffer around evaluated wells | 50 | Adaptive: *p*,0.003,0.003439,OK
 Table A7 2012-13 upazila survey | 600 m exclusion buffer around evaluated wells | 50 | Adaptive: blocks positive,41,41.0,OK
 Table A7 2012-13 upazila survey | 600 m exclusion buffer around evaluated wells | 50 | Adaptive: blocks,52,52.0,OK
-Table A8 truly safe at 50 µg/L (%),60.4,,SKIPPED
-Table A8 truly safe at 10 µg/L (%),42.0,,SKIPPED
 Table A8 learning protected (%): replicates,20,20.0,OK
 Table A8 learning protected (%): mean,15.6,15.637941,OK
 Table A8 learning protected (%): 2.5 percentile,14.7,14.654859,OK
@@ -3444,6 +3442,166 @@ Table A8 relative gain vs adaptive (%): mean,19.2,19.203385,OK
 Table A8 relative gain vs adaptive (%): 2.5 percentile,15.2,15.18602,OK
 Table A8 relative gain vs adaptive (%): 97.5 percentile,23.9,23.911409,OK
 Table A8 relative gain vs adaptive (%): replicates positive,20,20.0,OK
+Table A8 truly safe at 50 µg/L (%): replicates,200,200.0,OK
+Table A8 truly safe at 50 µg/L (%): mean,60.4,60.435722,OK
+Table A8 truly safe at 50 µg/L (%): 2.5 percentile,59.1,59.125458,OK
+Table A8 truly safe at 50 µg/L (%): 97.5 percentile,61.8,61.845038,OK
+Table A8 truly safe at 50 µg/L (%): replicates positive,200,200.0,OK
+Table A8 truly safe at 10 µg/L (%): replicates,200,200.0,OK
+Table A8 truly safe at 10 µg/L (%): mean,42.0,42.039903,OK
+Table A8 truly safe at 10 µg/L (%): 2.5 percentile,40.3,40.277163,OK
+Table A8 truly safe at 10 µg/L (%): 97.5 percentile,43.3,43.303389,OK
+Table A8 truly safe at 10 µg/L (%): replicates positive,200,200.0,OK
+Table A9 2000-01 census 10 5% all: predictions,18810,18810.0,OK
+Table A9 2000-01 census 10 5% all: truly safe,26.4,26.368953,OK
+Table A9 2000-01 census 10 5% all: Brier GP,0.152,0.152422,OK
+Table A9 2000-01 census 10 5% all: log loss GP,0.513,0.512699,OK
+Table A9 2000-01 census 10 5% all: Brier prior,0.164,0.164362,OK
+Table A9 2000-01 census 10 5% all: log loss prior,0.515,0.514781,OK
+Table A9 2000-01 census 10 5% shallow: predictions,15880,15880.0,OK
+Table A9 2000-01 census 10 5% shallow: truly safe,18.4,18.350126,OK
+Table A9 2000-01 census 10 5% shallow: Brier GP,0.139,0.138993,OK
+Table A9 2000-01 census 10 5% shallow: log loss GP,0.489,0.489009,OK
+Table A9 2000-01 census 10 5% shallow: Brier prior,0.148,0.147831,OK
+Table A9 2000-01 census 10 5% shallow: log loss prior,0.480,0.48041,OK
+Table A9 2000-01 census 10 5% deep: predictions,2930,2930.0,OK
+Table A9 2000-01 census 10 5% deep: truly safe,69.8,69.829352,OK
+Table A9 2000-01 census 10 5% deep: Brier GP,0.225,0.22521,OK
+Table A9 2000-01 census 10 5% deep: log loss GP,0.641,0.641091,OK
+Table A9 2000-01 census 10 5% deep: Brier prior,0.254,0.253956,OK
+Table A9 2000-01 census 10 5% deep: log loss prior,0.701,0.701066,OK
+Table A9 2000-01 census 10 20% all: predictions,15837,15837.0,OK
+Table A9 2000-01 census 10 20% all: truly safe,26.4,26.400202,OK
+Table A9 2000-01 census 10 20% all: Brier GP,0.135,0.135299,OK
+Table A9 2000-01 census 10 20% all: log loss GP,0.462,0.462249,OK
+Table A9 2000-01 census 10 20% all: Brier prior,0.165,0.165038,OK
+Table A9 2000-01 census 10 20% all: log loss prior,0.517,0.517436,OK
+Table A9 2000-01 census 10 20% shallow: predictions,13374,13374.0,OK
+Table A9 2000-01 census 10 20% shallow: truly safe,18.4,18.378944,OK
+Table A9 2000-01 census 10 20% shallow: Brier GP,0.123,0.122644,OK
+Table A9 2000-01 census 10 20% shallow: log loss GP,0.438,0.437946,OK
+Table A9 2000-01 census 10 20% shallow: Brier prior,0.148,0.148463,OK
+Table A9 2000-01 census 10 20% shallow: log loss prior,0.483,0.483215,OK
+Table A9 2000-01 census 10 20% deep: predictions,2463,2463.0,OK
+Table A9 2000-01 census 10 20% deep: truly safe,70.0,69.955339,OK
+Table A9 2000-01 census 10 20% deep: Brier GP,0.204,0.204015,OK
+Table A9 2000-01 census 10 20% deep: log loss GP,0.594,0.594212,OK
+Table A9 2000-01 census 10 20% deep: Brier prior,0.255,0.255041,OK
+Table A9 2000-01 census 10 20% deep: log loss prior,0.703,0.703255,OK
+Table A9 2000-01 census 50 5% all: predictions,18810,18810.0,OK
+Table A9 2000-01 census 50 5% all: truly safe,47.5,47.48538,OK
+Table A9 2000-01 census 50 5% all: Brier GP,0.187,0.186821,OK
+Table A9 2000-01 census 50 5% all: log loss GP,0.559,0.558625,OK
+Table A9 2000-01 census 50 5% all: Brier prior,0.218,0.217555,OK
+Table A9 2000-01 census 50 5% all: log loss prior,0.626,0.625893,OK
+Table A9 2000-01 census 50 5% shallow: predictions,15877,15877.0,OK
+Table A9 2000-01 census 50 5% shallow: truly safe,41.1,41.134975,OK
+Table A9 2000-01 census 50 5% shallow: Brier GP,0.197,0.197028,OK
+Table A9 2000-01 census 50 5% shallow: log loss GP,0.585,0.584606,OK
+Table A9 2000-01 census 50 5% shallow: Brier prior,0.230,0.22995,OK
+Table A9 2000-01 census 50 5% shallow: log loss prior,0.652,0.652358,OK
+Table A9 2000-01 census 50 5% deep: predictions,2933,2933.0,OK
+Table A9 2000-01 census 50 5% deep: truly safe,81.9,81.861575,OK
+Table A9 2000-01 census 50 5% deep: Brier GP,0.132,0.131571,OK
+Table A9 2000-01 census 50 5% deep: log loss GP,0.418,0.417988,OK
+Table A9 2000-01 census 50 5% deep: Brier prior,0.150,0.150457,OK
+Table A9 2000-01 census 50 5% deep: log loss prior,0.483,0.482632,OK
+Table A9 2000-01 census 50 20% all: predictions,15837,15837.0,OK
+Table A9 2000-01 census 50 20% all: truly safe,47.9,47.887858,OK
+Table A9 2000-01 census 50 20% all: Brier GP,0.167,0.166699,OK
+Table A9 2000-01 census 50 20% all: log loss GP,0.505,0.505151,OK
+Table A9 2000-01 census 50 20% all: Brier prior,0.217,0.217233,OK
+Table A9 2000-01 census 50 20% all: log loss prior,0.625,0.625299,OK
+Table A9 2000-01 census 50 20% shallow: predictions,13336,13336.0,OK
+Table A9 2000-01 census 50 20% shallow: truly safe,41.5,41.54919,OK
+Table A9 2000-01 census 50 20% shallow: Brier GP,0.176,0.175829,OK
+Table A9 2000-01 census 50 20% shallow: log loss GP,0.528,0.528183,OK
+Table A9 2000-01 census 50 20% shallow: Brier prior,0.230,0.229542,OK
+Table A9 2000-01 census 50 20% shallow: log loss prior,0.652,0.651512,OK
+Table A9 2000-01 census 50 20% deep: predictions,2501,2501.0,OK
+Table A9 2000-01 census 50 20% deep: truly safe,81.7,81.687325,OK
+Table A9 2000-01 census 50 20% deep: Brier GP,0.118,0.118016,OK
+Table A9 2000-01 census 50 20% deep: log loss GP,0.382,0.382339,OK
+Table A9 2000-01 census 50 20% deep: Brier prior,0.152,0.151599,OK
+Table A9 2000-01 census 50 20% deep: log loss prior,0.486,0.485524,OK
+Table A9 2012-13 upazila survey 10 5% all: predictions,133959,133959.0,OK
+Table A9 2012-13 upazila survey 10 5% all: truly safe,42.2,42.248748,OK
+Table A9 2012-13 upazila survey 10 5% all: Brier GP,0.148,0.148111,OK
+Table A9 2012-13 upazila survey 10 5% all: log loss GP,0.463,0.463068,OK
+Table A9 2012-13 upazila survey 10 5% all: Brier prior,0.190,0.190083,OK
+Table A9 2012-13 upazila survey 10 5% all: log loss prior,0.571,0.571032,OK
+Table A9 2012-13 upazila survey 10 5% shallow: predictions,98993,98993.0,OK
+Table A9 2012-13 upazila survey 10 5% shallow: truly safe,30.3,30.340529,OK
+Table A9 2012-13 upazila survey 10 5% shallow: Brier GP,0.151,0.150955,OK
+Table A9 2012-13 upazila survey 10 5% shallow: log loss GP,0.470,0.469658,OK
+Table A9 2012-13 upazila survey 10 5% shallow: Brier prior,0.194,0.19369,OK
+Table A9 2012-13 upazila survey 10 5% shallow: log loss prior,0.581,0.580611,OK
+Table A9 2012-13 upazila survey 10 5% deep: predictions,34966,34966.0,OK
+Table A9 2012-13 upazila survey 10 5% deep: truly safe,76.0,75.962363,OK
+Table A9 2012-13 upazila survey 10 5% deep: Brier GP,0.140,0.14006,OK
+Table A9 2012-13 upazila survey 10 5% deep: log loss GP,0.444,0.444413,OK
+Table A9 2012-13 upazila survey 10 5% deep: Brier prior,0.180,0.179871,OK
+Table A9 2012-13 upazila survey 10 5% deep: log loss prior,0.544,0.543912,OK
+Table A9 2012-13 upazila survey 10 20% all: predictions,112806,112806.0,OK
+Table A9 2012-13 upazila survey 10 20% all: truly safe,42.2,42.230023,OK
+Table A9 2012-13 upazila survey 10 20% all: Brier GP,0.131,0.131327,OK
+Table A9 2012-13 upazila survey 10 20% all: log loss GP,0.419,0.419489,OK
+Table A9 2012-13 upazila survey 10 20% all: Brier prior,0.190,0.189879,OK
+Table A9 2012-13 upazila survey 10 20% all: log loss prior,0.570,0.570387,OK
+Table A9 2012-13 upazila survey 10 20% shallow: predictions,83357,83357.0,OK
+Table A9 2012-13 upazila survey 10 20% shallow: truly safe,30.3,30.304593,OK
+Table A9 2012-13 upazila survey 10 20% shallow: Brier GP,0.133,0.133112,OK
+Table A9 2012-13 upazila survey 10 20% shallow: log loss GP,0.423,0.423146,OK
+Table A9 2012-13 upazila survey 10 20% shallow: Brier prior,0.193,0.19348,OK
+Table A9 2012-13 upazila survey 10 20% shallow: log loss prior,0.580,0.579898,OK
+Table A9 2012-13 upazila survey 10 20% deep: predictions,29449,29449.0,OK
+Table A9 2012-13 upazila survey 10 20% deep: truly safe,76.0,75.985602,OK
+Table A9 2012-13 upazila survey 10 20% deep: Brier GP,0.126,0.126273,OK
+Table A9 2012-13 upazila survey 10 20% deep: log loss GP,0.409,0.409139,OK
+Table A9 2012-13 upazila survey 10 20% deep: Brier prior,0.180,0.179687,OK
+Table A9 2012-13 upazila survey 10 20% deep: log loss prior,0.543,0.543466,OK
+Table A9 2012-13 upazila survey 50 5% all: predictions,133959,133959.0,OK
+Table A9 2012-13 upazila survey 50 5% all: truly safe,60.5,60.455811,OK
+Table A9 2012-13 upazila survey 50 5% all: Brier GP,0.166,0.165616,OK
+Table A9 2012-13 upazila survey 50 5% all: log loss GP,0.501,0.500537,OK
+Table A9 2012-13 upazila survey 50 5% all: Brier prior,0.199,0.199401,OK
+Table A9 2012-13 upazila survey 50 5% all: log loss prior,0.583,0.582519,OK
+Table A9 2012-13 upazila survey 50 5% shallow: predictions,98967,98967.0,OK
+Table A9 2012-13 upazila survey 50 5% shallow: truly safe,50.7,50.654258,OK
+Table A9 2012-13 upazila survey 50 5% shallow: Brier GP,0.194,0.194145,OK
+Table A9 2012-13 upazila survey 50 5% shallow: log loss GP,0.573,0.573038,OK
+Table A9 2012-13 upazila survey 50 5% shallow: Brier prior,0.234,0.233671,OK
+Table A9 2012-13 upazila survey 50 5% shallow: log loss prior,0.661,0.660547,OK
+Table A9 2012-13 upazila survey 50 5% deep: predictions,34992,34992.0,OK
+Table A9 2012-13 upazila survey 50 5% deep: truly safe,88.2,88.177298,OK
+Table A9 2012-13 upazila survey 50 5% deep: Brier GP,0.085,0.084928,OK
+Table A9 2012-13 upazila survey 50 5% deep: log loss GP,0.295,0.295485,OK
+Table A9 2012-13 upazila survey 50 5% deep: Brier prior,0.102,0.102475,OK
+Table A9 2012-13 upazila survey 50 5% deep: log loss prior,0.362,0.361835,OK
+Table A9 2012-13 upazila survey 50 20% all: predictions,112806,112806.0,OK
+Table A9 2012-13 upazila survey 50 20% all: truly safe,60.5,60.486144,OK
+Table A9 2012-13 upazila survey 50 20% all: Brier GP,0.149,0.149375,OK
+Table A9 2012-13 upazila survey 50 20% all: log loss GP,0.457,0.457137,OK
+Table A9 2012-13 upazila survey 50 20% all: Brier prior,0.199,0.199295,OK
+Table A9 2012-13 upazila survey 50 20% all: log loss prior,0.582,0.582399,OK
+Table A9 2012-13 upazila survey 50 20% shallow: predictions,83316,83316.0,OK
+Table A9 2012-13 upazila survey 50 20% shallow: truly safe,50.7,50.734553,OK
+Table A9 2012-13 upazila survey 50 20% shallow: Brier GP,0.175,0.175093,OK
+Table A9 2012-13 upazila survey 50 20% shallow: log loss GP,0.525,0.524955,OK
+Table A9 2012-13 upazila survey 50 20% shallow: Brier prior,0.233,0.233261,OK
+Table A9 2012-13 upazila survey 50 20% shallow: log loss prior,0.660,0.65982,OK
+Table A9 2012-13 upazila survey 50 20% deep: predictions,29490,29490.0,OK
+Table A9 2012-13 upazila survey 50 20% deep: truly safe,88.0,88.036623,OK
+Table A9 2012-13 upazila survey 50 20% deep: Brier GP,0.077,0.076714,OK
+Table A9 2012-13 upazila survey 50 20% deep: log loss GP,0.266,0.265536,OK
+Table A9 2012-13 upazila survey 50 20% deep: Brier prior,0.103,0.103334,OK
+Table A9 2012-13 upazila survey 50 20% deep: log loss prior,0.364,0.363667,OK
+Results: GP Brier minimum,0.08,0.076714,OK
+Results: GP Brier maximum,0.23,0.22521,OK
+Results: prior Brier minimum,0.10,0.102475,OK
+Results: prior Brier maximum,0.26,0.255041,OK
+Results: GP Brier below prior in every setting (1 = yes),1,1.0,OK
+Results: largest census under-prediction at 10 µg/L (deciles with >= 30 wells),0.22,0.218343,OK
 Table A10 kit 0: pairs,144,144.0,OK
 Table A10 kit 0: median,0.5,0.47918,OK
 Table A10 kit 0: safe 10,95.8,95.833333,OK

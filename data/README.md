@@ -3,7 +3,7 @@
 | Folder | Source | Licence | What to put there |
 |---|---|---|---|
 | data/raw/araihazar/ | HydroShare, doi:10.4211/hs.8e1373d87419447c945625af13f0a2ea (Jameel et al.) | CC BY 4.0 | Dataset1.csv (944 kit-laboratory pairs) and Dataset2.csv (6,605 wells, 2000-01) |
-| data/raw/bd_araihazar2012_kit/ | HydroShare, doi:10.4211/hs.48e779d1aeac49609e3077625092e31b (Knappett et al.) | CC BY 4.0 | Well_Water_Arsenic_Concentration.xlsx (46,976 wells, 2012-13) |
+| data/raw/bd_araihazar2012_kit/ | HydroShare, doi:10.4211/hs.48e779d1aeac49609e3077625092e31b (Knappett et al.) | CC BY 4.0 | Well_Water_Arsenic_Concentration.xlsx, sheet 'Dissolved As Concentration' (46,976 wells, 2012-13; the resource accompanies Huang et al. 2022 and does not label the survey year: identified as the 2012-13 blanket survey of van Geen et al. 2014 by its coverage of the 12 unions, kit reading steps, tester codes, well identifiers linking 1,187 wells to the census, and size) |
 | data/raw/bd_supp_vangeen2019/ | Supporting Information of Jamil et al. 2019, Environ. Sci. Technol., doi:10.1021/acs.est.9b01375 (PMC6535723) | publisher terms | es9b01375_si_001.xlsx (national village summary; context only) |
 
 SHA-256 checksums of the files used:

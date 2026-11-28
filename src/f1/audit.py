@@ -2,13 +2,18 @@
 
 Written separately from figures6.py and inference.py (own interpolation to the primary effort, scipy.stats.ttest_rel and
 t.interval, Holm correction from statsmodels, scipy.stats.permutation_test). It recomputes every cell of Table 2 and of
-Appendix Tables A1-A8 and A10, and the numbers in the abstract and in selected sentences of the text, and compares them
-with what the manuscript prints (manuscript/manuscript.md and manuscript/appendix.md).
+Appendix Tables A1-A10, and the numbers in the abstract and in selected sentences of the text, and compares them with
+what the manuscript prints (manuscript/manuscript.md and manuscript/appendix.md). Table A9 and the calibration
+statements are recomputed from the saved per-well predictions (results/f1_v6_calibration_predictions.csv.gz); the
+Gaussian-process predictions themselves are checked against scikit-learn in tests/test_sim4.py. The share of wells truly
+safe in Table A8 is recomputed from the 200 saved bootstrap draws (results/f1_v6_boot_truth.csv).
 
 Tolerance: a printed value passes if it equals the recomputed value up to rounding (half a unit of its last printed
-digit); Monte Carlo permutation p-values may also differ by three Monte Carlo standard errors. Table A9 (probability
-calibration) is not recomputed here. Checks that need the raw data (not redistributed) are reported as SKIPPED when
-the data are absent. The script exits with status 1 if any check fails. Results: results/f1_v6_audit.csv.
+digit); Monte Carlo permutation p-values may also differ by three Monte Carlo standard errors. Checks that need the raw
+data, which are not redistributed (Table A10, the kit-error variance and the Table A1 rows for the blocks outside the
+census area), are reported as SKIPPED when the data are absent, so a passing run without the data means that every
+check that could be run passed. With the data present nothing is skipped. The script exits with status 1 if any check
+fails. Results: results/f1_v6_audit.csv.
 """
 import itertools, math, pathlib, re, sys
 import numpy as np, pandas as pd
@@ -389,12 +394,67 @@ def table_a8(app):
     for row in body:
         cells = dict(zip(head, row))
         q = cells["Quantity"]
-        if q not in R:
-            check(f"Table A8 {q}", cells["Mean"], None); continue
+        if q not in R:          # share of wells truly safe: checked from the saved draws in boot_truth_rows
+            continue
         v = R[q].to_numpy()
         check(f"Table A8 {q}: replicates", cells["Replicates"], len(v))
         check(f"Table A8 {q}: mean", cells["Mean"], v.mean())
         lo, hi = cells["2.5-97.5 percentile"].split(" to ")
+        check(f"Table A8 {q}: 2.5 percentile", lo, np.percentile(v, 2.5)); check(f"Table A8 {q}: 97.5 percentile", hi, np.percentile(v, 97.5))
+        check(f"Table A8 {q}: replicates positive", cells["Replicates positive"], int((v > 0).sum()))
+
+
+def table_a9(app, md):
+    """Brier score, log loss, counts and share safe from the saved per-well predictions (results of calibration.py)."""
+    head, body = md_table(app, "**Table A9.**")
+    P = pd.read_csv(RES / "f1_v6_calibration_predictions.csv.gz")
+    area = {"2000-01 census": "census", "2012-13 upazila survey": "upazila"}
+    for row in body:
+        cells = dict(zip(head, row))
+        g = P[(P.area == area[cells["Survey"]]) & (P.thr == float(cells["Threshold (µg/L)"])) &
+              (np.isclose(P.frac, float(cells["Wells tested (%)"]) / 100))]
+        if cells["Layer"] != "all":
+            g = g[g.layer == cells["Layer"]]
+        y = g.y.to_numpy(float)
+        name = f"Table A9 {cells['Survey']} {cells['Threshold (µg/L)']} {cells['Wells tested (%)']}% {cells['Layer']}"
+        check(f"{name}: predictions", cells["Predictions"], len(g))
+        check(f"{name}: truly safe", cells["Truly safe (%)"], 100 * y.mean())
+        for m, lab in (("gp", "GP"), ("prior", "prior")):
+            q = np.clip(g[f"p_{m}"].to_numpy(float), 1e-6, 1 - 1e-6)
+            check(f"{name}: Brier {lab}", cells[f"Brier, {lab}"], np.mean((q - y) ** 2))
+            check(f"{name}: log loss {lab}", cells[f"Log loss, {lab}"], -np.mean(y * np.log(q) + (1 - y) * np.log(1 - q)))
+    # text: Brier ranges over all rows, GP better than the prior in every row, largest census under-prediction at 10 ug/L
+    keys = ["area", "thr", "frac"]
+    rows = []
+    for k, g in list(P.groupby(keys)) + list(P.groupby(keys + ["layer"])):
+        y = g.y.to_numpy(float)
+        rows.append({m: np.mean((np.clip(g[f"p_{m}"], 1e-6, 1 - 1e-6) - y) ** 2) for m in ("gp", "prior")})
+    R = pd.DataFrame(rows)
+    m = re.search(r"lower Brier scores than the depth prior in every setting \((\d\.\d+)-(\d\.\d+) against (\d\.\d+)-(\d\.\d+)\)", md)
+    check("Results: GP Brier minimum", m.group(1), R.gp.min()); check("Results: GP Brier maximum", m.group(2), R.gp.max())
+    check("Results: prior Brier minimum", m.group(3), R.prior.min()); check("Results: prior Brier maximum", m.group(4), R.prior.max())
+    check("Results: GP Brier below prior in every setting (1 = yes)", "1", int((R.gp < R.prior).all()))
+    c = P[(P.area == "census") & (P.thr == 10)].copy()
+    c["bin"] = np.minimum((c.p_gp * 10).astype(int), 9)
+    b = c.groupby(["frac", "bin"]).agg(pred=("p_gp", "mean"), obs=("y", "mean"), n=("y", "size"))
+    b = b[b.n >= 30]
+    under = re.search(r"under-predicted the share of safe wells by up to (\d\.\d+)", md).group(1)
+    check("Results: largest census under-prediction at 10 µg/L (deciles with >= 30 wells)", under, (b.obs - b.pred).max())
+
+
+def boot_truth_rows(app):
+    """Rows of Table A8 for the share of wells truly safe, from the 200 saved bootstrap draws."""
+    head, body = md_table(app, "**Table A8.**")
+    draws = pd.read_csv(RES / "f1_v6_boot_truth.csv")
+    cols = {"truly safe at 50 µg/L (%)": "truly_safe_50_pct", "truly safe at 10 µg/L (%)": "truly_safe_10_pct"}
+    for row in body:
+        cells = dict(zip(head, row))
+        if cells["Quantity"] not in cols:
+            continue
+        v = draws[cols[cells["Quantity"]]].to_numpy()
+        lo, hi = cells["2.5-97.5 percentile"].split(" to ")
+        q = cells["Quantity"]
+        check(f"Table A8 {q}: replicates", cells["Replicates"], len(v)); check(f"Table A8 {q}: mean", cells["Mean"], v.mean())
         check(f"Table A8 {q}: 2.5 percentile", lo, np.percentile(v, 2.5)); check(f"Table A8 {q}: 97.5 percentile", hi, np.percentile(v, 97.5))
         check(f"Table A8 {q}: replicates positive", cells["Replicates positive"], int((v > 0).sum()))
 
@@ -446,7 +506,7 @@ def main():
     holm_a5 = table_a5(app, eff)
     table_a6(app)
     a7 = table_a7(app)
-    table_a8(app); table_a10(app)
+    table_a8(app); boot_truth_rows(app); table_a9(app, md); table_a10(app)
     text_claims(md, eff, holm_primary, holm_a5, a7)
     A = pd.DataFrame(checks)
     A.to_csv(RES / "f1_v6_audit.csv", index=False)

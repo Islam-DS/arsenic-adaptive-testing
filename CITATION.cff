@@ -17,7 +17,8 @@ authors:
 license:
   - MIT          # code (src/, tests/, manuscript/*.py)
   - CC-BY-4.0    # results, manuscript text and figures
-doi: 10.5281/zenodo.24578227
+version: 1.2.0
+doi: 10.5281/zenodo.24566074   # concept DOI (all versions); the version used in the article is cited there
 repository-code: "https://github.com/Islam-DS/arsenic-adaptive-testing"
-date-released: 2026-11-24
+date-released: 2026-11-28
 keywords: [arsenic, groundwater, tube wells, adaptive sampling, active learning, Gaussian process, Bangladesh, SDG 6.1]

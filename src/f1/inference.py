@@ -128,6 +128,7 @@ def bootstrap_truth(n_boot=200, seed=0):
         lab = impute_lab(kb, kits, rng)
         share.append(((lab <= 50).mean(), (lab <= 10).mean()))
     share = np.array(share)
+    pd.DataFrame(100 * share, columns=["truly_safe_50_pct", "truly_safe_10_pct"]).to_csv(RES / "f1_v6_boot_truth.csv", index=False)
     try:
         b = effort(load("v6_bd2012_boot"))
     except FileNotFoundError:

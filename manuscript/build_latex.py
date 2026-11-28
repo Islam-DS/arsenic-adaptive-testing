@@ -170,7 +170,8 @@ def section_text(md, name):
     return m.group(1).strip() if m else ""
 
 
-def main():
+def make_tex():
+    """The LaTeX source generated from manuscript.md, appendix.md and references.bib."""
     src = (M / "manuscript.md").read_text(encoding="utf-8")
     fm = re.match(r"---\n(.*?)\n---\n", src, re.S)
     meta = dict(re.findall(r'(\w+): "?(.*?)"?$', fm.group(1), re.M))
@@ -280,6 +281,11 @@ The following abbreviations are used in this manuscript:\\
 \end{{adjustwidth}}
 \end{{document}}
 """
+    return tex, len(order)
+
+
+def main():
+    tex, n_refs = make_tex()
     (L / "main.tex").write_text(tex, encoding="utf-8")
     for _ in range(2):
         r = subprocess.run(["pdflatex", "-interaction=nonstopmode", "-halt-on-error", "main.tex"], cwd=L,
@@ -287,7 +293,7 @@ The following abbreviations are used in this manuscript:\\
         if r.returncode:
             print(r.stdout[-3000:])
             raise SystemExit("pdflatex failed")
-    print(len(order), "references; built", L / "main.pdf")
+    print(n_refs, "references; built", L / "main.pdf")
 
 
 if __name__ == "__main__":

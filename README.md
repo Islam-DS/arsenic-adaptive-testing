@@ -36,10 +36,12 @@ See [`data/README.md`](data/README.md) for sources, licences and checksums:
 | `inference.py` | permutation and Wilcoxon tests, confirmatory blocks, super-blocks, Monte Carlo error, costings, sensitivity and bootstrap analyses (Tables A5-A8, A10) and Figure A1 |
 | `calibration.py` | calibration of the predicted probabilities on held-out blocks (Table A9, Figure A2) |
 | `figures.py` | Figure 1 (map) |
-| `audit.py` | independent recomputation, from the campaign results, of every cell of Table 2 and Tables A1-A8 and A10 and of the numbers in the abstract and selected sentences; exits with an error if any value differs beyond rounding (`results/f1_v6_audit.csv`). Table A9 is not recomputed. |
+| `audit.py` | independent recomputation of every cell of Table 2 and Tables A1-A10 and of the numbers in the abstract and selected sentences (Table A9 from the saved per-well predictions; the Gaussian-process predictions are checked against scikit-learn in the tests); exits with an error if any value differs beyond rounding (`results/f1_v6_audit.csv`). Checks that need the raw data are marked SKIPPED when the data are absent, so a pass without the data means that every check that could be run passed; with the data, 3,655 checks pass and none is skipped. |
 
-Also: `src/verify_data.py` (checks the input files against their SHA-256 checksums) and `src/scopus_citations.py`
-(the citation check behind the Scopus statement in the Introduction; the Scopus export itself cannot be redistributed).
+Also: `src/verify_data.py` (checks the input files against their SHA-256 checksums); `src/scopus_citations.py` (the
+citation check behind the Scopus statement in the Introduction; the export cannot be redistributed, so record
+identifiers and match flags are in `results/scopus_citation_check.csv`); `manuscript/check_submission.py` (checks that
+the files in `submission/` were generated from the current, audited sources and figures).
 Earlier development versions of the simulator and runner (`sim3.py`, `experiment.py`, `experiment3.py`) are kept
 because `sim4.py` and `experiment4.py` import parts of them; the design history is in Table A4 of the article.
 
@@ -66,6 +68,7 @@ python -X utf8 -c "import sys; sys.path.insert(0, 'src/f1'); import figures; fig
 python -X utf8 manuscript/make_appendix.py  # Appendices A-B (Figures A1-A2, Tables A1-A10) from the results
 python -X utf8 src/f1/audit.py          # independent check of the published numbers
 python -X utf8 manuscript/build_latex.py   # LaTeX manuscript (MDPI template) and PDF
+python -X utf8 manuscript/check_submission.py  # submitted PDF, LaTeX source and figures match the audited sources
 ```
 
 The results of the runs reported in the article are included in `results/` (`f1_v6_*.csv`; `f1_v6_primary.csv` holds

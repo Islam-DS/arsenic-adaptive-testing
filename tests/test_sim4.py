@@ -163,3 +163,52 @@ def test_earlier_survey_values_do_not_enter_the_gp():
     c2.obs_log[c2.known] = np.random.default_rng(2).uniform(0, 3, len(c2.known))   # scramble the old values
     s2 = Spy(); go(c2, "learning", s2)
     assert s1.log == s2.log
+
+
+def test_gp_probabilities_match_scikit_learn():
+    """The Gaussian-process probability of being safe equals the one implied by scikit-learn's GP regressor with the
+    same fixed kernel (exponential covariance = Matern nu 0.5, plus a white-noise nugget)."""
+    from scipy.stats import norm
+    from sklearn.gaussian_process import GaussianProcessRegressor
+    from sklearn.gaussian_process.kernels import ConstantKernel, Matern, WhiteKernel
+    rng = np.random.default_rng(11)
+    b = block(n=120, seed=11)
+    b["as_ppb"] = 10 ** rng.normal(1.6, 0.6, len(b)); b["log_as"] = np.log10(b.as_ppb.clip(lower=1))
+    camp = campaign(b)
+    sill, rho, nug = 0.2, 300.0, 0.1
+    tested, untested = np.arange(40), np.arange(40, len(b))
+    p = GPLearner(sill, rho, nug).predict(camp, tested, untested)
+    k = ConstantKernel(sill, "fixed") * Matern(rho, "fixed", nu=0.5) + WhiteKernel(nug, "fixed")
+    gpr = GaussianProcessRegressor(k, optimizer=None, normalize_y=False).fit(camp.X[tested], camp.obs_log[tested] - camp.m0[tested])
+    mean, sd = gpr.predict(camp.X[untested], return_std=True)          # sd includes the nugget
+    expected = norm.cdf((np.log10(50) - camp.m0[untested] - mean) / (camp.sd0[untested] * sd / np.sqrt(sill + nug)))
+    assert np.allclose(p, expected, atol=1e-8)
+
+
+@pytest.mark.parametrize("daily_return", [False, True])
+def test_counts_at_day_boundaries(daily_return):
+    """All wells at one spot (no walking, base included): with 20-minute tests exactly 18 wells fit in a 360-minute day,
+    and the counts recorded at 360, 720 and 1,080 minutes are 18, 36 and 54, with or without daily return."""
+    n = 80
+    d = pd.DataFrame(dict(x=np.zeros(n), y=np.zeros(n), as_ppb=np.random.default_rng(0).uniform(100, 300, n),
+                          depth_ft=40.0, deep=0))
+    d["log_as"] = np.log10(d.as_ppb)
+    r, _ = go(campaign(d), "sweep", daily_return=daily_return)
+    t = r.set_index("days").tests
+    assert (t[1.0], t[2.0], t[3.0]) == (18, 36, 54)
+    assert t[0.5] == 9
+
+
+def test_walk_home_is_recorded_at_the_day_mark():
+    """50 wells at the base and 10 wells 1,300 m away (walk 33.8 min each way). On day 3 the last 14 base wells take
+    280 min; a far visit would end the day at 280 + 33.8 + 20 + 33.8 = 367.6 > 360 min, so with daily return the
+    team stops and the count at 1,080 min is 50. Without daily return two far wells fit (52)."""
+    X = np.vstack([np.zeros((50, 2)), np.c_[np.full(10, 1300.0), np.zeros(10)]])
+    d = pd.DataFrame(dict(x=X[:, 0], y=X[:, 1], as_ppb=np.random.default_rng(1).uniform(100, 300, len(X)), depth_ft=40.0, deep=0))
+    d["log_as"] = np.log10(d.as_ppb)
+    camp = campaign(d)
+    assert int(np.argmin(((camp.X - camp.X.mean(0)) ** 2).sum(1))) < 50      # the base is in the large cluster
+    t_home = go(camp, "sweep", daily_return=True)[0].set_index("days").tests
+    t_free = go(campaign(d), "sweep", daily_return=False)[0].set_index("days").tests
+    assert (t_home[1.0], t_home[2.0], t_home[3.0]) == (18, 36, 50)
+    assert t_free[3.0] == 52

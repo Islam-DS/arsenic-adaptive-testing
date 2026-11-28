@@ -22,6 +22,7 @@
 !/results/f1_dev6_lam_rerun.csv
 !/results/run_v6.sh
 !/results/run_dev_v6.sh
+!/results/scopus_citation_check.csv
 !/results/v6_summary.txt
 !/docs/
 /docs/*

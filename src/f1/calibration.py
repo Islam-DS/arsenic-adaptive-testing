@@ -7,7 +7,8 @@ treated as tested (5% or 20%; their kit readings are observed), and P(safe) is p
 the Gaussian process fitted on the other half and with the depth prior alone. Predictions are scored against the true
 status (laboratory value; imputed from the kit-laboratory pairs in the 2012-13 survey): Brier score, log loss and
 reliability by decile of predicted probability, by layer (shallow/deep) and threshold.
-Writes results/f1_v6_calibration.csv, results/f1_v6_calibration_bins.csv and manuscript/figures/figA2_calibration.png.
+Writes results/f1_v6_calibration.csv, results/f1_v6_calibration_bins.csv, every prediction in
+results/f1_v6_calibration_predictions.csv.gz and manuscript/figures/figA2_calibration.png.
 """
 import pathlib, sys, zlib
 import numpy as np, pandas as pd
@@ -74,6 +75,9 @@ def main():
     S = pd.concat([P.groupby(["area", "thr", "frac"]).apply(scores).reset_index().assign(layer="all"),
                    P.groupby(["area", "thr", "frac", "layer"]).apply(scores).reset_index()], ignore_index=True)
     S.to_csv(RES / "f1_v6_calibration.csv", index=False)
+    # every prediction, so that the audit can recompute Table A9 and the reliability bins independently
+    P[["area", "thr", "frac", "block", "rep", "layer", "y", "p_gp", "p_prior"]].to_csv(
+        RES / "f1_v6_calibration_predictions.csv.gz", index=False, float_format="%.6f", compression="gzip")
     pd.set_option("display.width", 200)
     print(S.round(4).to_string())
     P["bin"] = np.minimum((P.p_gp * 10).astype(int), 9)
