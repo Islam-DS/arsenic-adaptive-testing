@@ -1,6 +1,6 @@
 # Learning where to test: adaptive arsenic testing of tube wells
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24578227.svg)](https://doi.org/10.5281/zenodo.24578227)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24630138.svg)](https://doi.org/10.5281/zenodo.24630138)
 
 Code and results for the article
 
