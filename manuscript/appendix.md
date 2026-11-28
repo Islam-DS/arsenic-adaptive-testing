@@ -471,7 +471,7 @@ For a comparison, $d_b$ is the mean over the runs of block *b* of the paired dif
 | relative gain vs adaptive (%) | 20 | 19.2 | 15.2 to 23.9 | 20 |
 
 <!-- spec: L{2.2cm}R{1.2cm}R{1.2cm}L{1.2cm}R{1.4cm}R{1.2cm}R{1.2cm}R{1.2cm}R{1.3cm}R{1.3cm} -->
-**Table A9.** Calibration of the predicted probability that a well is safe, on held-out blocks (split 0, both directions of cross-fitting, 3 repetitions). A random 5% or 20% of the wells of each block were treated as tested, and the Gaussian process (GP) fitted on the other half, or the depth prior alone, predicted the remaining wells; lower Brier score and log loss are better. Reliability diagrams are in Figure A2.
+**Table A9.** Held-out calibration experiment for the predicted probability that a well is safe (split 0, both directions of cross-fitting, 3 repetitions). The tested wells were chosen at random, not by an adaptive policy: a random 5% or 20% of the wells of each block were treated as tested, and the Gaussian process (GP) fitted on the other half, or the depth prior alone, predicted the remaining wells; lower Brier score and log loss are better. Reliability diagrams are in Figure A2.
 
 | Survey | Threshold (µg/L) | Wells tested (%) | Layer | Predictions | Truly safe (%) | Brier, GP | Brier, prior | Log loss, GP | Log loss, prior |
 |---|---|---|---|---|---|---|---|---|---|
