@@ -10,6 +10,8 @@ Same outcome and score as v5 (sim3.py) plus:
     time is spent, the well can be retried on a later day).
 """
 import numpy as np
+from scipy import sparse
+from scipy.sparse.csgraph import maximum_flow
 from sim2 import Field
 
 EPS = 1e-9
@@ -34,6 +36,23 @@ def _capacity_protected(camp, cand_h, src, cap):
             load[s] += 1
             n += 1
     return n
+
+
+def _capacity_optimal(camp, cand_h, src, cap):
+    """Maximum number of informed exposed households that can be assigned to truly safe sources within r, each source
+    serving at most `cap` households (maximum flow in the bipartite graph; an upper bound for the greedy rule)."""
+    if len(cand_h) == 0 or len(src) == 0:
+        return 0
+    sub = camp.D[cand_h][:, src].tocoo()
+    if sub.nnz == 0:
+        return 0
+    H, S = len(cand_h), len(src)
+    s_node, t_node = 0, H + S + 1                 # nodes: source 0, households 1..H, wells H+1..H+S, sink
+    rows = np.r_[np.zeros(H, int), 1 + sub.row, 1 + H + np.arange(S)]
+    cols = np.r_[1 + np.arange(H), 1 + H + sub.col, np.full(S, t_node)]
+    caps = np.r_[np.ones(H, np.int32), np.ones(sub.nnz, np.int32), np.full(S, cap, np.int32)]
+    g = sparse.csr_matrix((caps, (rows, cols)), shape=(H + S + 2, H + S + 2))
+    return int(maximum_flow(g, s_node, t_node).flow_value)
 
 
 def run4(camp, policy, learner, rng, fieldp=Field(), days=10, lam=0.1, tertile=None, marks_days=(1, 5, 10),
@@ -73,7 +92,7 @@ def run4(camp, policy, learner, rng, fieldp=Field(), days=10, lam=0.1, tertile=N
                  misled_src=int(mis_src.sum()), false_alarm=int(false_alarm.sum()),
                  informed=int((exposed & inf_unsafe).sum()), access=int(src_true.sum()),
                  switch=float(np.exp(-best_d[prot] / DECAY_M).sum()),
-                 prot_cap=_capacity_protected(camp, cand, src, cap))
+                 prot_cap=_capacity_protected(camp, cand, src, cap), prot_cap_opt=_capacity_optimal(camp, cand, src, cap))
         if tertile is not None:
             for k in range(3):
                 r[f"prot_t{k}"] = int((prot & (tertile == k)).sum())
@@ -96,13 +115,29 @@ def run4(camp, policy, learner, rng, fieldp=Field(), days=10, lam=0.1, tertile=N
             break
         walk = np.sqrt(((camp.X[cand] - pos) ** 2).sum(1)) * fieldp.detour / fieldp.walk_m_per_min
         cost = fieldp.test_min + walk
+        if daily_return:
+            # a visit must leave time to walk back to the base well before the working day ends
+            day_end = (day + 1) * fieldp.day_min
+            back = np.sqrt(((camp.X[cand] - camp.X[base]) ** 2).sum(1)) * fieldp.detour / fieldp.walk_m_per_min
+            ok = minutes + cost + back <= day_end + 1e-9
+            if not ok.any():                      # walk home now; the next day starts at the base
+                home = np.sqrt(((pos - camp.X[base]) ** 2).sum()) * fieldp.detour / fieldp.walk_m_per_min
+                minutes = max(minutes + home, day_end)
+                pos = camp.X[base]
+                while mi < len(marks) and minutes >= marks[mi]:
+                    record(marks[mi] / fieldp.day_min); mi += 1
+                if minutes >= limit:
+                    break
+                continue
+            cand, walk, cost = cand[ok], walk[ok], cost[ok]
         if policy == "sweep":
             jc = int(np.argmin(walk + rng.uniform(0, 1e-6, len(cand))))
         else:
             if policy in ("learning", "uncertainty"):
-                info = np.union1d(np.flatnonzero(tested), known)
-                untested_all = np.flatnonzero(~tested)
-                info_c = np.setdiff1d(untested_all, info)
+                # the learner is conditioned only on wells tested in this campaign; wells with an earlier-survey
+                # value keep their calibrated P(safe now | old status) until tested (no old values enter the GP)
+                info = np.flatnonzero(tested)
+                info_c = np.setdiff1d(np.flatnonzero(~tested), known)
                 p = p_base.copy()
                 if len(info_c):
                     p[info_c] = learner.predict(camp, info, info_c)

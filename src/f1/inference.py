@@ -7,7 +7,7 @@
 * spatial dependence: upazila blocks aggregated into 4 km x 4 km super-blocks;
 * Monte Carlo error of block means (runs and splits) against the spread between blocks;
 * cost per person protected under three costings;
-* Figure S1: paired difference in every block.
+* Figure A1: paired difference in every block.
 """
 import itertools, pathlib, sys
 import numpy as np, pandas as pd
@@ -27,14 +27,16 @@ USD_KIT = 0.17                 # kit consumables per test
 
 
 def signflip_p(x, n_mc=200_000, seed=0):
+    """Two-sided paired sign-flip test of mean(x) = 0. Exact enumeration up to 16 units (the observed pattern is one of
+    the 2^n patterns); otherwise n_mc random patterns with the (b + 1) / (B + 1) estimate, which is never zero."""
     x = np.asarray(x, float)
     obs = abs(x.mean())
     if len(x) <= 16:
         signs = np.array(list(itertools.product((1, -1), repeat=len(x))))
-    else:
-        signs = np.random.default_rng(seed).choice((1, -1), size=(n_mc, len(x)))
-    null = np.abs((signs * x).mean(1))
-    return float((null >= obs - 1e-12).mean())
+        return float((np.abs((signs * x).mean(1)) >= obs - 1e-12).mean())
+    signs = np.random.default_rng(seed).choice((1, -1), size=(n_mc, len(x)))
+    b = int((np.abs((signs * x).mean(1)) >= obs - 1e-12).sum())
+    return (b + 1) / (n_mc + 1)
 
 
 def tci(x):
@@ -104,6 +106,82 @@ def fig_blocks(diffs):
     fig.tight_layout(rect=(0, 0.08, 1, 1)); fig.savefig(FIG / "figS1_blocks.png"); plt.close(fig)
 
 
+def bootstrap_truth(n_boot=200, seed=0):
+    """Table A8 and A10: uncertainty of the imputed 2012-13 laboratory truth.
+    (a) Kit categories of the 944 pairs: n, median laboratory value, share safe at 10 and 50 ug/L.
+    (b) Share of the 46,976 wells truly safe, imputing from n_boot bootstrap samples of the 944 pairs.
+    (c) Primary comparisons in each of 20 bootstrap replicates of the policy runs (v6_bd2012_boot; one bootstrap
+        sample per split x seed, shared by all blocks and policies)."""
+    from data import load_kit
+    from data_ext import load_bd2012
+    from experiment4 import impute_lab
+    from figures6 import compare
+    k = load_kit()
+    cat = k.groupby("kit").lab.agg(n="size", median="median", safe10=lambda s: (s <= 10).mean(),
+                                   safe50=lambda s: (s <= 50).mean()).reset_index()
+    cat.to_csv(RES / "f1_v6_table_A10.csv", index=False)
+    kits = load_bd2012().as_ppb.to_numpy()
+    rng = np.random.default_rng(seed)
+    share = []
+    for _ in range(n_boot):
+        kb = k.sample(frac=1.0, replace=True, random_state=int(rng.integers(1 << 31)))
+        lab = impute_lab(kb, kits, rng)
+        share.append(((lab <= 50).mean(), (lab <= 10).mean()))
+    share = np.array(share)
+    try:
+        b = effort(load("v6_bd2012_boot"))
+    except FileNotFoundError:
+        return
+    b = b[b.thr == 50]
+    rows = []
+    for (split, seed_), g in b.groupby(["split", "seed"]):
+        r = {"split": split, "seed": seed_,
+             "learning": 100 * unit_means(g, "protected_share").query("arm == @HEAD").protected_share.mean()}
+        for c in COMPARATORS:
+            x = compare(g, HEAD, c)
+            r[c] = x["diff"]; r[c + "_rel"] = x["rel_pooled"]
+        rows.append(r)
+    R = pd.DataFrame(rows)
+    summ = {"truly safe at 50 ug/L (%)": 100 * share[:, 0], "truly safe at 10 ug/L (%)": 100 * share[:, 1],
+            "learning protected (%)": R.learning.to_numpy()}
+    for c, lab in zip(COMPARATORS, ("door-to-door", "static plan", "adaptive")):
+        summ[f"gain vs {lab} (pp)"] = R[c].to_numpy()
+        summ[f"relative gain vs {lab} (%)"] = R[c + "_rel"].to_numpy()
+    A8 = pd.DataFrame([dict(quantity=q, replicates=len(v), mean=np.mean(v), lo=np.percentile(v, 2.5),
+                            hi=np.percentile(v, 97.5), min=np.min(v), positive=int((v > 0).sum()))
+                       for q, v in summ.items()])
+    A8.to_csv(RES / "f1_v6_table_A8.csv", index=False)
+    R.to_csv(RES / "f1_v6_boot_replicates.csv", index=False)
+    print(A8.round(3).to_string())
+
+
+def sensitivity():
+    """Table A7: measurement assumptions of the Gaussian process (kit readings of 0; kit error in the nugget)."""
+    from figures6 import compare
+    rows = []
+    for lab, base, tag in (("2000-01 census", "v6_main", "v6_zero5"), ("2012-13 upazila survey", "v6_bd2012", "v6_bd2012_zero5"),
+                           ("2000-01 census", "v6_main", "v6_kitnug"), ("2000-01 census", "v6_main", "v6_buffer"),
+                           ("2012-13 upazila survey", "v6_bd2012", "v6_bd2012_buffer")):
+        try:
+            s = effort(load(tag))
+        except FileNotFoundError:
+            continue
+        b = effort(load(base))
+        name = ("kit reading 0 set to 5 ug/L" if "zero5" in tag else "kit-error variance added to nugget" if "kitnug" in tag
+                else "600 m exclusion buffer around evaluated wells")
+        for thr in (50, 10):
+            ss, bb = s[s.thr == thr], b[b.thr == thr]
+            if ss.empty:
+                continue
+            base_learn = 100 * unit_means(bb, "protected_share").query("arm == @HEAD").protected_share.mean()
+            for c in COMPARATORS:
+                r = compare(ss, HEAD, c)
+                rows.append(dict(survey=lab, analysis=name, thr=thr, comparator=ARMS[c][0], learning_base=base_learn, **r))
+    S7 = pd.DataFrame(rows); S7.to_csv(RES / "f1_v6_table_A7.csv", index=False)
+    print(S7[["survey", "analysis", "thr", "comparator", "learning_base", "a_pct", "b_pct", "diff", "lo", "hi", "p",
+              "units_positive", "rel_pooled"]].round(3).to_string())
+
+
 if __name__ == "__main__":
     pd.set_option("display.width", 250)
     e = {"2000-01 census": effort(load("v6_main")), "2012-13 upazila survey": effort(load("v6_bd2012"))}
@@ -132,36 +210,14 @@ if __name__ == "__main__":
     T = pd.DataFrame(rows)
     for c in ("p_t", "p_perm", "p_wilcoxon"):
         T[c + "_holm"] = holm(T[c])
-    T.to_csv(RES / "f1_v6_inference.csv", index=False)
+    T.to_csv(RES / "f1_v6_table_A5.csv", index=False)
     print(T.round(4).T.to_string())
     fig_blocks(diffs)
     for survey, tag in (("2000-01 census", "v6_main"), ("2012-13 upazila survey", "v6_bd2012")):
         C = costs(load(tag)); C.to_csv(RES / f"f1_v6_cost_{tag.split('_')[1]}.csv")
         print(survey, "\n", C.loc[["sweep:-", "static:-", "adaptive:-", HEAD]].round(3).to_string())
-    f = load("v6_field")
-    C = costs(f); C.to_csv(RES / "f1_v6_cost_field.csv")
-    print("field realism\n", C.loc[["sweep:-", "static:-", "adaptive:-", HEAD]].round(3).to_string())
+    for tag, out in (("v6_field", "field"), ("v6_t29", "t29"), ("v6_bd2012_t29", "bd2012_t29")):
+        C = costs(load(tag)); C.to_csv(RES / f"f1_v6_cost_{out}.csv")
+        print(tag, "\n", C.loc[["sweep:-", "static:-", "adaptive:-", HEAD]].round(3).to_string())
     sensitivity()
-
-
-def sensitivity():
-    """Table S7: measurement assumptions of the Gaussian process (kit readings of 0; kit error in the nugget)."""
-    from figures6 import compare
-    rows = []
-    for lab, base, tag in (("2000-01 census", "v6_main", "v6_zero5"), ("2012-13 upazila survey", "v6_bd2012", "v6_bd2012_zero5"),
-                           ("2000-01 census", "v6_main", "v6_kitnug")):
-        try:
-            s = effort(load(tag))
-        except FileNotFoundError:
-            continue
-        b = effort(load(base))
-        name = "kit reading 0 set to 5 ug/L" if "zero5" in tag else "kit-error variance added to nugget"
-        for thr in (50, 10):
-            ss, bb = s[s.thr == thr], b[b.thr == thr]
-            base_learn = 100 * unit_means(bb, "protected_share").query("arm == @HEAD").protected_share.mean()
-            for c in COMPARATORS:
-                r = compare(ss, HEAD, c)
-                rows.append(dict(survey=lab, analysis=name, thr=thr, comparator=ARMS[c][0], learning_base=base_learn, **r))
-    S7 = pd.DataFrame(rows); S7.to_csv(RES / "f1_v6_table_S7.csv", index=False)
-    print(S7[["survey", "analysis", "thr", "comparator", "learning_base", "a_pct", "b_pct", "diff", "lo", "hi", "p",
-              "units_positive", "rel_pooled"]].round(3).to_string())
+    bootstrap_truth()

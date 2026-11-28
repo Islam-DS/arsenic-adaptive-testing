@@ -3,7 +3,7 @@ with Appendices A-B from appendix.md (written by make_appendix.py).
 
     python -X utf8 manuscript/build.py
 """
-import html, pathlib, re, subprocess, tempfile
+import html, os, pathlib, re, shutil, subprocess, tempfile
 import markdown
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -11,7 +11,9 @@ from docx.shared import Pt, Cm
 
 M = pathlib.Path(__file__).resolve().parent
 ROOT = M.parent
-CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+CHROME = (os.environ.get("CHROME") or shutil.which("google-chrome") or shutil.which("chromium")
+          or shutil.which("chromium-browser") or r"C:\Program Files\Google\Chrome\Application\chrome.exe")
+# Chrome/Chromium is used only to print manuscript.pdf from HTML; the MDPI LaTeX version is built by build_latex.py
 
 
 # ------------------------------------------------------------------ bibliography

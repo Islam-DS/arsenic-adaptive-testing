@@ -191,7 +191,8 @@ if __name__ == "__main__":
     sets.append(("2012-13, blocks outside the census area", bd[~bd.unit.isin(ov)]))
     for tag, lab in (("v6_field", "field realism (daily return, 15% absent)"), ("v6_advise", "advise if kit ≤ ½ threshold"),
                      ("v6_radius", "radius"), ("v6_nokit", "no kit error"), ("v6_thin", "thinned"),
-                     ("v6_t10", "10 min per test"), ("v6_bd2012_old", "2012-13 with 2000-01 survey")):
+                     ("v6_t10", "10 min per test"), ("v6_t29", "about 12 tests per day (29 min per test)"),
+                     ("v6_bd2012_t29", "2012-13, about 12 tests per day"), ("v6_bd2012_old", "2012-13 with 2000-01 survey")):
         try:
             sets.append((lab, load(tag)))
         except FileNotFoundError:
@@ -213,7 +214,7 @@ if __name__ == "__main__":
                                          comparator=b, **r))
     # other outcomes (main + bd, 10 days)
     for lab, d in (("2000-01 census", main), ("2012-13 upazila survey", bd)):
-        for metric in ("prot_cap_share", "switch_share"):
+        for metric in ("prot_cap_share", "prot_cap_opt_share", "switch_share"):
             for thr in (50, 10):
                 for b in ("sweep:-", "static:-", "adaptive:-"):
                     r = compare(d[(d.thr == thr) & (d.days == 10)], HEAD, b, metric)
@@ -222,14 +223,14 @@ if __name__ == "__main__":
                                          horizon="10 days", comparator=b, **r))
     S1 = pd.DataFrame(rows)
     S1_out = S1.assign(comparator=S1.comparator.map(lambda c: ARMS.get(c, (c,))[0]))
-    S1_out.to_csv(RES / "f1_v6_table_S1.csv", index=False)
+    S1_out.to_csv(RES / "f1_v6_table_A1.csv", index=False)
     print("overlap blocks", len(ov))
     # ---- learners
     try:
         L = load("v6_learners"); eL = effort(L)
         S2 = pd.DataFrame([dict(thr=t, comparator=b, **compare(eL[eL.thr == t], HEAD, b))
                            for t in (50, 10) for b in ("learning:rf", "learning:lgbm", "learning:knn")])
-        S2.assign(comparator=S2.comparator.map(lambda c: ARMS[c][0])).to_csv(RES / "f1_v6_table_S2.csv", index=False); print("LEARNERS\n", S2.round(3).to_string())
+        S2.assign(comparator=S2.comparator.map(lambda c: ARMS[c][0])).to_csv(RES / "f1_v6_table_A2.csv", index=False); print("LEARNERS\n", S2.round(3).to_string())
     except FileNotFoundError:
         pass
     # ---- equity
@@ -242,7 +243,7 @@ if __name__ == "__main__":
                     r = compare(s, HEAD, b, f"prot_t{t}_share")
                     if r:
                         eq.append(dict(survey=lab, thr=thr, tertile=["fewest safe", "middle", "most safe"][t], comparator=b, **r))
-    S3 = pd.DataFrame(eq); S3.assign(comparator=S3.comparator.map(lambda c: ARMS[c][0])).to_csv(RES / "f1_v6_table_S3.csv", index=False); print("EQUITY\n", S3.round(2).to_string())
+    S3 = pd.DataFrame(eq); S3.assign(comparator=S3.comparator.map(lambda c: ARMS[c][0])).to_csv(RES / "f1_v6_table_A3.csv", index=False); print("EQUITY\n", S3.round(2).to_string())
     # ---- harm, misled split, false alarms, tests/day, cost
     for lab, d in (("census", main), ("upazila", bd)):
         s = d[(d.thr == 50) & (d.days == 10)]
@@ -267,7 +268,7 @@ if __name__ == "__main__":
     fr = []
     for lab in ["2000-01 census", "2012-13 upazila survey", "2012-13, blocks outside the census area",
                 "field realism (daily return, 15% absent)", "advise if kit ≤ ½ threshold", "no kit error",
-                "10 min per test", "2012-13 with 2000-01 survey"]:
+                "10 min per test", "about 12 tests per day (29 min per test)", "2012-13 with 2000-01 survey"]:
         for b in ("sweep:-", "static:-"):
             x = S1[(S1.setting == lab) & (S1.thr == 50) & (S1.radius == 100) & (S1.thin == 1) &
                    (S1.horizon == "5 d/1000 wells") & (S1.comparator == b)]

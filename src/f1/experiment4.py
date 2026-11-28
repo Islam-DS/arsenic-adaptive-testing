@@ -13,6 +13,7 @@ Key changes against experiment3:
 """
 import argparse, itertools, json, os, pathlib, sys, time, zlib
 import numpy as np, pandas as pd
+from scipy.spatial import cKDTree
 from joblib import Parallel, delayed
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from data import load_wells, load_kit, ROOT
@@ -65,14 +66,17 @@ def known_probs(fit_df, thr):
 
 
 def one(area, split, blk_name, blk, prior, models, policy, learner, seed, radius, thr, kit, kit_df, fieldp, days, lam,
-        advise, known, known_p, impute, cap, daily_return, absent, thin=1.0):
+        advise, known, known_p, impute, cap, daily_return, absent, thin=1.0, boot_pairs=False):
     key = zlib.crc32(f"{area}/{blk_name}".encode())
     rng = np.random.default_rng([seed, key, int(radius), int(thr), split, int(1000 * thin)])
     b = blk if thin >= 1 else blk.sample(frac=thin, random_state=seed).reset_index(drop=True)
     if impute:
         b = b.copy()
         b["kit_obs"] = b["as_ppb"].to_numpy()
-        b["as_ppb"] = impute_lab(kit_df, b["kit_obs"].to_numpy(), rng)
+        kd = kit_df
+        if boot_pairs:      # one bootstrap sample of the 944 kit-laboratory pairs per replicate (split, seed), shared by all
+            kd = kit_df.sample(frac=1.0, replace=True, random_state=10_000 * (split + 1) + seed)   # blocks and policies
+        b["as_ppb"] = impute_lab(kd, b["kit_obs"].to_numpy(), rng)
         b["log_as"] = np.log10(b["as_ppb"].clip(lower=1))
     camp = Campaign(b, prior, radius, thr, rng, kit=kit, advise_frac=advise, known_frac=known, known_p=known_p)
     rng = np.random.default_rng([seed, key, 7, split])
@@ -89,7 +93,7 @@ def one(area, split, blk_name, blk, prior, models, policy, learner, seed, radius
                    daily_return=daily_return, absent=absent, cap=cap, thin=thin, n=camp.n, exposed=n_exp, secs=time.time() - t0)
         for k, v in r.items():
             row[k] = v
-        for k in ("protected", "misled_own", "misled_src", "informed", "switch", "prot_cap"):
+        for k in ("protected", "misled_own", "misled_src", "informed", "switch", "prot_cap", "prot_cap_opt"):
             row[k + "_share"] = r[k] / max(n_exp, 1)
         row["false_alarm_share"] = r["false_alarm"] / max(camp.n - n_exp, 1)
         for t in range(3):
@@ -134,6 +138,8 @@ def main():
     ap.add_argument("--jobs", type=int, default=14)
     ap.add_argument("--thin", type=float, nargs="+", default=[1.0])
     ap.add_argument("--zero_as", type=float, default=1.0, help="value (ug/L) given to kit readings of 0 before log10")
+    ap.add_argument("--boot_pairs", action="store_true", help="bootstrap the 944 kit-laboratory pairs for the imputed truth")
+    ap.add_argument("--buffer_m", type=float, default=0.0, help="exclude fitting wells within this distance of evaluated wells")
     ap.add_argument("--kit_nugget", action="store_true", help="add the kit-error variance (944 pairs) to the GP nugget")
     a = ap.parse_args()
 
@@ -171,6 +177,10 @@ def main():
         else:
             for fit, ev in (("dev", "test"), ("test", "dev")):
                 fitb = list(halves[fit].values())
+                if a.buffer_m > 0:   # drop fitting wells within buffer_m of any evaluated well (spatial exclusion buffer)
+                    tree = cKDTree(np.vstack([g[["x", "y"]].to_numpy() for g in halves[ev].values()]))
+                    fitb = [g[tree.query(g[["x", "y"]].to_numpy())[0] > a.buffer_m].reset_index(drop=True) for g in fitb]
+                    fitb = [g for g in fitb if len(g)]
                 prior, models = add_kit_var(*build_models(fitb, thr, 0, a.learners), kit_var)
                 kp = known_probs(pd.concat(fitb), thr) if a.known < 0 else None
                 targets += [(b, g, prior, models, kp) for b, g in halves[ev].items()]
@@ -182,7 +192,7 @@ def main():
                     for lr in (a.learners if pol in ("learning", "uncertainty") else ["prior"]):
                         jobs.append((a.area, split, b, blk, prior, models, pol, lr, seed, radius, thr, kitm, kit_df,
                                      fieldp, a.days, lam, a.advise, a.known, kp, a.impute, a.cap, a.daily_return,
-                                     a.absent, thin))
+                                     a.absent, thin, a.boot_pairs))
     print(len(jobs), "campaigns", flush=True)
     t = time.time()
     rows = Parallel(n_jobs=a.jobs, verbose=2)(delayed(one)(*j) for j in jobs)

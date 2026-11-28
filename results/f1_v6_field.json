@@ -44,5 +44,9 @@
  "jobs": 14,
  "thin": [
   1.0
- ]
+ ],
+ "zero_as": 1.0,
+ "boot_pairs": false,
+ "buffer_m": 0.0,
+ "kit_nugget": false
 }

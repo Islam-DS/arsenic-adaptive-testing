@@ -14,7 +14,9 @@ authors:
     given-names: Nadezhda
     affiliation: Riga Technical University
     orcid: "https://orcid.org/0000-0002-0980-0958"
-license: MIT
+license:
+  - MIT          # code (src/, tests/, manuscript/*.py)
+  - CC-BY-4.0    # results, manuscript text and figures
 doi: 10.5281/zenodo.24578227
 repository-code: "https://github.com/Islam-DS/arsenic-adaptive-testing"
 date-released: 2026-11-24

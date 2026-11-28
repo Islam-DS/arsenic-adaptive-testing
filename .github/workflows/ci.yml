@@ -1,0 +1,25 @@
+name: tests and audit
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - name: Install the pinned environment
+        run: pip install -r requirements.txt
+      - name: Unit tests (simulator, inference, audit)
+        run: python -X utf8 -m pytest tests -q
+      - name: Audit of the reported numbers against the committed results
+        # the raw data are not redistributed, so checks that need them are reported as skipped
+        run: python -X utf8 src/f1/audit.py
+      - name: Appendix and manuscript sources can be generated
+        run: |
+          python -X utf8 manuscript/make_appendix.py
+          python -X utf8 -c "import sys; sys.path.insert(0, 'manuscript'); import build, build_latex"

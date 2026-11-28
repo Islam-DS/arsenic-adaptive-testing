@@ -4,6 +4,9 @@
 !/README.md
 !/LICENSE
 !/CITATION.cff
+!/LICENSE-CC-BY-4.0.md
+!/requirements.txt
+!/.github/
 !/src/
 !/tests/
 !/manuscript/
@@ -16,7 +19,9 @@
 /results/*
 !/results/f1_v6_*
 !/results/f1_dev6_lam.csv
+!/results/f1_dev6_lam_rerun.csv
 !/results/run_v6.sh
+!/results/run_dev_v6.sh
 !/results/v6_summary.txt
 !/docs/
 /docs/*

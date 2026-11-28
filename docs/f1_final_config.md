@@ -1,6 +1,6 @@
 # Design log
 
-The design history is summarised in Table S4 of the article. This file records the settings of each version.
+The design history is summarised in Table A4 of the article. This file records the settings of each version.
 
 ## v1-v2 (2026-11-19, fixed on development blocks before any test-block run)
 - Simulator: src/f1/sim2.py; 3 km/h walking, detour factor 1.3, 360 min per team-day.
@@ -45,15 +45,31 @@ The design history is summarised in Table S4 of the article. This file records t
 ## Additional analyses (2026-11-27, no new simulation runs)
 - src/f1/inference.py on the v6 results: sign-flip permutation (exact for 10 census blocks) and Wilcoxon tests of the
   primary family, Holm-adjusted; the five confirmatory census blocks reported as rows of Table 2; leave-one-block-out
-  range; 17 upazila super-blocks of 4 km; Monte Carlo SE of block means against the SD between blocks; Figure S1.
+  range; 17 upazila super-blocks of 4 km; Monte Carlo SE of block means against the SD between blocks; Figure A1.
 - Costing clarified: time-based (US$28.80 per team-day = 12 tests x US$2.40 all-in), time plus kit (US$0.17 per test)
-  and per test (US$2.40 x tests performed); tests per day from the runs (Table S6).
+  and per test (US$2.40 x tests performed); tests per day from the runs (Table A6).
 
 ## Sensitivity analyses (2026-11-28)
 - experiment4.py --zero_as 5: kit readings of 0 set to 5 ug/L before log10 (fitting data and campaign observations),
   census and upazila survey (v6_zero5, v6_bd2012_zero5). --kit_nugget: kit-error variance of the 944 pairs (0.113)
-  added to the GP nugget in the census (v6_kitnug). Defaults reproduce v6_main exactly. Table S7 (inference.py).
+  added to the GP nugget in the census (v6_kitnug). Defaults reproduce v6_main exactly. Table A7 (inference.py).
 
 ## Reproducibility audit (2026-11-28)
-- src/f1/audit.py recomputes Table 2, Holm, permutation/Wilcoxon (Table S5), costs (Table S6), Table S7 and the
+- src/f1/audit.py recomputes Table 2, Holm, permutation/Wilcoxon (Table A5), costs (Table A6), Table A7 and the
   kit-error variance independently from the campaign results; 116/116 checks match (results/f1_v6_audit.csv).
+
+## Corrections and checks after the fifth review (2026-11-28)
+- sim4.run4: under --daily_return a well is chosen only if the walk to it, the test and the walk back to the base fit in the
+  working day; otherwise the team walks back and the next day starts at the base (previously the team was moved to the base
+  without travel time). v6_field re-run. Main runs unchanged (identical outputs checked).
+- sim4.run4: the learner is conditioned only on wells tested in the campaign; earlier-survey wells enter only through the
+  calibrated P(safe now | old status). v6_bd2012_old re-run (lead over the static plan in 11 blocks 4.7 -> 3.3 points).
+- inference.signflip_p: Monte Carlo p-values use (b + 1)/(B + 1).
+- New metric prot_cap_opt (maximum-flow capacity assignment); v6_main and v6_bd2012 re-run with identical existing columns.
+- New runs: v6_bd2012_boot (bootstrap of the 944 pairs, 20 replicates), v6_buffer and v6_bd2012_buffer (600 m exclusion
+  buffer), v6_t29 and v6_bd2012_t29 (29 min per test, about 12 tests per day). calibration.py: probability calibration.
+- Development tuning: results/run_dev_v6.sh; the rerun with the final code (f1_dev6_lam_rerun.csv) selects the same weights
+  as the original f1_dev6_lam.csv (earlier development version of the simulator).
+- audit.py rewritten: every cell of Table 2 and Tables A1-A8, A10 plus abstract and selected text numbers; rounding-only
+  tolerance; exits with status 1 on any mismatch (3,495 checks OK, 2 skipped). Tests: tests/test_sim4.py, test_inference_audit.py.
+- Pinned environment (requirements.txt), src/verify_data.py, CI workflow, CC BY licence file, S->A table naming.
